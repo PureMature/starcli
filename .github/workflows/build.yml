@@ -3,6 +3,8 @@ name: Build
 on:
   push:
     branches: ["master"]
+    tags:
+      - "v*"
   pull_request:
     branches: ["master"]
 
@@ -20,6 +22,8 @@ jobs:
   build:
     name: Test with ${{ matrix.go-version }} on ${{ matrix.vm-os }}
     runs-on: ${{ matrix.vm-os }}
+    permissions:
+      contents: write
     env:
       # CI_REPORT: ${{ matrix.vm-os == 'ubuntu-20.04' && matrix.go-version == '1.18.10' }}
       CI_REPORT: false
@@ -29,24 +33,24 @@ jobs:
       matrix:
         vm-os: [
           ubuntu-20.04,
-          macos-13,
+          # macos-13,
           macos-14,
           windows-2022
         ]
         go-version: [
           1.18.10,
-          1.19.13,
-          1.20.14,
-          1.21.10,
-          1.22.3,
+          # 1.19.13,
+          # 1.20.14,
+          # 1.21.10,
+          # 1.22.3,
         ]
-    permissions:
-      contents: read
     # Steps to execute
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go-version }}
           cache: true
@@ -64,29 +68,26 @@ jobs:
         run: |
           make preview
           make artifact
-      - name: Cache Artifact
-        uses: actions/cache/save@v3
+
+      - name: Get current date
+        id: get_date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+
+      - name: Upload Artifact for Development
+        if: github.ref != 'refs/heads/master'
+        uses: actions/upload-artifact@v2
         with:
+          name: distbed-dev
           path: _upload
-          key: ${{ env.CACHE_PREFIX }}-${{ runner.os }}
-          enableCrossOsArchive: true
-      - name: Docker Build
-        if: ${{ runner.os == 'Linux' }}
-        run: |
-          make build_docker
-          make run_docker
-      - name: Upload Coverage Reports to Codecov
-        if: ${{ fromJSON(env.CI_REPORT) }}
-        uses: codecov/codecov-action@v3
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: coverage.txt
-      - name: Upload Coverage Reports to Codacy
-        if: ${{ fromJSON(env.CI_REPORT) }}
-        env:
-          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
-        run:
-          bash <(curl -Ls https://coverage.codacy.com/get.sh) report --force-coverage-parser go -r coverage.txt
+          name: "Built on ${{ steps.get_date.outputs.date }}"
+          files: |
+            _upload/*
+
       - name: Analyze on Linux
         if: ${{ runner.os == 'Linux' }}
         run: |
@@ -116,6 +117,7 @@ jobs:
           printf '```\n\n```bash\n' >> $GITHUB_STEP_SUMMARY
           find . -maxdepth 1 -type f -size +524288c | xargs -I {} stat --format="%n %s" {} | awk '{printf "%s\t\t%sB\n", $1, $2}' >> $GITHUB_STEP_SUMMARY
           printf '```\n\n' >> $GITHUB_STEP_SUMMARY
+
       - name: Analyze on macOS
         if: ${{ runner.os == 'macOS' }}
         run: |
