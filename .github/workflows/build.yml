@@ -3,10 +3,11 @@ name: Build
 on:
   push:
     branches: ["master"]
-    tags:
-      - "v*"
   pull_request:
     branches: ["master"]
+    paths-ignore:
+      - '**.md'
+      - 'LICENSE'
 
 env:
   OSEXT_MAP: '{"Linux": "linux", "macOS": "macos", "Windows": "exe"}'
@@ -22,18 +23,13 @@ jobs:
   build:
     name: Test with ${{ matrix.go-version }} on ${{ matrix.vm-os }}
     runs-on: ${{ matrix.vm-os }}
-    permissions:
-      contents: write
-    env:
-      # CI_REPORT: ${{ matrix.vm-os == 'ubuntu-20.04' && matrix.go-version == '1.18.10' }}
-      CI_REPORT: false
     strategy:
       max-parallel: 10
       fail-fast: false
       matrix:
         vm-os: [
           ubuntu-20.04,
-          # macos-13,
+          macos-13,
           macos-14,
           windows-2022
         ]
@@ -69,36 +65,29 @@ jobs:
           make preview
           make artifact
 
-      - name: Get current date
-        id: get_date
-        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
-
-      - name: Upload Artifact for Development
-        if: github.ref != 'refs/heads/master'
+      - name: Upload Artifact
+        if: ${{ startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' }}
         uses: actions/upload-artifact@v2
         with:
           name: distbed-dev
           path: _upload
 
-      - name: Release
-        uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          name: "Built on ${{ steps.get_date.outputs.date }}"
-          files: |
-            _upload/*
-
-      - name: Analyze on Linux
-        if: ${{ runner.os == 'Linux' }}
+      - name: Analyze
+        if: ${{ runner.os == 'macOS' || runner.os == 'Linux' }}
         run: |
           # Setup
-          wget -cqL https://github.com/XAMPPRocky/tokei/releases/download/v12.1.2/tokei-i686-unknown-linux-musl.tar.gz -O tokei.tgz
+          if [[ ${{ runner.os }} == 'Linux' ]]; then
+            wget -cqL https://github.com/XAMPPRocky/tokei/releases/download/v12.1.2/tokei-i686-unknown-linux-musl.tar.gz -O tokei.tgz
+            wget -cqL https://github.com/mgechev/revive/releases/download/v1.3.7/revive_linux_amd64.tar.gz -O revive.tgz
+          elif [[ ${{ runner.os }} == 'macOS' ]]; then
+            wget -cqL https://github.com/XAMPPRocky/tokei/releases/download/v12.1.2/tokei-x86_64-apple-darwin.tar.gz -O tokei.tgz
+            wget -cqL https://github.com/mgechev/revive/releases/download/v1.3.7/revive_darwin_amd64.tar.gz -O revive.tgz
+          fi
           tar zxf tokei.tgz tokei && chmod +x tokei && $SUDO mv tokei /usr/local/bin && rm tokei.tgz
-          wget -cqL https://github.com/mgechev/revive/releases/download/v1.3.7/revive_linux_amd64.tar.gz -O revive.tgz
           tar zxf revive.tgz revive && chmod +x revive && $SUDO mv revive /usr/local/bin && rm revive.tgz
           wget -cqL https://raw.githubusercontent.com/1set/meta/master/revive.toml -O revive.toml
           # Analyze
-          echo "# Analysis on Linux" > $GITHUB_STEP_SUMMARY
+          echo "# Analysis on ${{ runner.os }}" > $GITHUB_STEP_SUMMARY
           uname -a >> $GITHUB_STEP_SUMMARY
           # --- count lines of code
           echo "## Tokei Result" >> $GITHUB_STEP_SUMMARY
@@ -113,37 +102,12 @@ jobs:
           # --- file size
           echo "## File Size" >> $GITHUB_STEP_SUMMARY
           printf '\n```bash\n' >> $GITHUB_STEP_SUMMARY
-          ls -laSh >> $GITHUB_STEP_SUMMARY
+          export CMDDIR=_upload
+          ls -laSh "$CMDDIR" >> $GITHUB_STEP_SUMMARY
           printf '```\n\n```bash\n' >> $GITHUB_STEP_SUMMARY
-          find . -maxdepth 1 -type f -size +524288c | xargs -I {} stat --format="%n %s" {} | awk '{printf "%s\t\t%sB\n", $1, $2}' >> $GITHUB_STEP_SUMMARY
-          printf '```\n\n' >> $GITHUB_STEP_SUMMARY
-
-      - name: Analyze on macOS
-        if: ${{ runner.os == 'macOS' }}
-        run: |
-          # Setup
-          wget -cqL https://github.com/XAMPPRocky/tokei/releases/download/v12.1.2/tokei-x86_64-apple-darwin.tar.gz -O tokei.tgz
-          tar zxf tokei.tgz tokei && chmod +x tokei && $SUDO mv tokei /usr/local/bin && rm tokei.tgz
-          wget -cqL https://github.com/mgechev/revive/releases/download/v1.3.7/revive_darwin_amd64.tar.gz -O revive.tgz
-          tar zxf revive.tgz revive && chmod +x revive && $SUDO mv revive /usr/local/bin && rm revive.tgz
-          wget -cqL https://raw.githubusercontent.com/1set/meta/master/revive.toml -O revive.toml
-          # Analyze
-          echo "# Analysis on macOS" > $GITHUB_STEP_SUMMARY
-          uname -a >> $GITHUB_STEP_SUMMARY
-          # --- count lines of code
-          echo "## Tokei Result" >> $GITHUB_STEP_SUMMARY
-          printf '\n```\n' >> $GITHUB_STEP_SUMMARY
-          tokei >> $GITHUB_STEP_SUMMARY
-          printf '```\n\n' >> $GITHUB_STEP_SUMMARY
-          # --- lint
-          echo "## Revive Result" >> $GITHUB_STEP_SUMMARY
-          printf '\n```\n' >> $GITHUB_STEP_SUMMARY
-          revive -config revive.toml -formatter friendly ./... >> $GITHUB_STEP_SUMMARY
-          printf '```\n\n' >> $GITHUB_STEP_SUMMARY
-          # --- file size
-          echo "## File Size" >> $GITHUB_STEP_SUMMARY
-          printf '\n```bash\n' >> $GITHUB_STEP_SUMMARY
-          ls -laSh >> $GITHUB_STEP_SUMMARY
-          printf '```\n\n```bash\n' >> $GITHUB_STEP_SUMMARY
-          find . -maxdepth 1 -type f -size +524288c | xargs -I {} stat -f "%N %z" {} | awk '{printf "%s\t\t%sB\n", $1, $2}' >> $GITHUB_STEP_SUMMARY
+          if [[ ${{ runner.os }} == 'Linux' ]]; then
+            find "$CMDDIR" -maxdepth 1 -type f -size +524288c | xargs -I {} stat --format="%n %s" {} | awk '{printf "%s\t\t%sB\n", $1, $2}' >> $GITHUB_STEP_SUMMARY
+          elif [[ ${{ runner.os }} == 'macOS' ]]; then
+            find "$CMDDIR" -maxdepth 1 -type f -size +524288c | xargs -I {} stat -f "%N %z" {} | awk '{printf "%s\t\t%sB\n", $1, $2}' >> $GITHUB_STEP_SUMMARY
+          fi
           printf '```\n\n' >> $GITHUB_STEP_SUMMARY

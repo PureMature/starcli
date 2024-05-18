@@ -49,12 +49,18 @@ build_windows:
 
 run: build
 	./$(BINARY)
-test: build
+
+preview:
 	./$(BINARY) arg.star Aloha
 
-install: build
+install:
 ifndef GOBIN
 	$(error GOBIN is not set)
 endif
 	@if [ ! -d "$(GOBIN)" ]; then echo "Directory $(GOBIN) does not exist"; exit 1; fi
 	cp $(BINARY) $(GOBIN)
+
+artifact:
+	test -n "$(OSEXT)"
+	mkdir -p _upload
+	cp -f $(BINARY) _upload/$(BINARY).$(OSEXT)

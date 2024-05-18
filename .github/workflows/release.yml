@@ -1,0 +1,83 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag Name for Release'
+        required: true
+      release_name:
+        description: 'Release Name'
+        required: true
+      release_body:
+        description: 'Release Notes'
+        required: true
+
+env:
+  OSEXT_MAP: '{"Linux": "linux", "macOS": "macos", "Windows": "exe"}'
+  CACHE_PREFIX: upload-${{ github.run_id }}-${{ github.run_attempt }}
+
+defaults:
+  run:
+    shell: bash
+
+permissions: read-all
+
+jobs:
+  build:
+    name: Test with ${{ matrix.go-version }} on ${{ matrix.vm-os }}
+    runs-on: ${{ matrix.vm-os }}
+    permissions:
+      contents: write
+    strategy:
+      max-parallel: 10
+      fail-fast: false
+      matrix:
+        vm-os: [
+          ubuntu-20.04,
+          # macos-13,
+          macos-14,
+          windows-2022
+        ]
+        go-version: [
+          1.18.10,
+          # 1.19.13,
+          # 1.20.14,
+          # 1.21.10,
+          # 1.22.3,
+        ]
+    # Steps to execute
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+          cache: true
+      - name: Go Build
+        run: |
+          export
+          git status
+          go version
+          go mod download
+          make --version
+          make build
+      - name: Test
+        env:
+          OSEXT: ${{ fromJSON(env.OSEXT_MAP)[runner.os] }}
+        run: |
+          make preview
+          make artifact
+
+      - name: Manual Release
+        uses: softprops/action-gh-release@v2
+        if: github.event_name == 'workflow_dispatch' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master')
+        with:
+          tag_name: ${{ github.event.inputs.tag_name }}
+          name: ${{ github.event.inputs.release_name }}
+          body: ${{ github.event.inputs.release_body }}
+          append_body: false
+          files: |
+            _upload/*
