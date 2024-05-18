@@ -1,9 +1,10 @@
 # starcli
 
-Created on 2024-05-14 at 2024-05-14T02:18:37.194901+08:00.
+!!!WIP!!!
 
-## Feature
+curl -sSL https://github.com/PureMature/starcli/releases/download/b1/starcli.macos -o starcli
+install -m 0755 starcli /usr/local/bin
 
-## Scenario
 
-## Architecture
+curl -sSL https://github.com/PureMature/starcli/releases/download/b1/starcli.linux -o starcli
+install -m 0755 starcli /usr/local/bin
