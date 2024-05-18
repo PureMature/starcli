@@ -51,7 +51,7 @@ run: build
 	./$(BINARY)
 
 preview:
-	./$(BINARY) arg.star Aloha
+	./$(BINARY) arg.star Aloha -- -h 1
 
 install:
 ifndef GOBIN
