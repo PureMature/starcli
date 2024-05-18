@@ -23,14 +23,20 @@ var (
 
 var (
 	//go:embed logo.txt
-	logoArt      string
-	logoArtColor = cl.CherryBlossomsByColumn(logoArt)
+	logoArt string
 )
 
 func displayBuildInfo() {
+	// is on master
+	onMaster := GitBranch == "master" || GitBranch == "main" || GitBranch == ""
+
 	// write logo
 	var sb strings.Builder
-	sb.WriteString(logoArtColor)
+	if onMaster {
+		sb.WriteString(cl.CherryBlossomsByColumn(logoArt))
+	} else {
+		sb.WriteString(cl.EveningNightByColumn(logoArt))
+	}
 	sb.WriteString(ystring.NewLine)
 
 	// inline helpers
