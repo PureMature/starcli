@@ -17,6 +17,8 @@ kfiglet StarCLI -f 'Univers' -p 2 > logo.txt
 
 kfiglet STARCLI -f 'Calvin S' -p 2 | pbcopy
 
+echo "" > logo.txt
+kfiglet StarCLI -f 'Colossal' -p 2  >> logo.txt
 
 starcli
 STARCLI
@@ -26,3 +28,4 @@ Good:
 Calvin S
 tmplr
 Colossal
+
