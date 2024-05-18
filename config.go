@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "embed"
 	"fmt"
 	"strings"
 
@@ -21,21 +22,21 @@ var (
 )
 
 var (
-	logoArt = `
-  ███████╗████████╗ █████╗ ██████╗ ██╗     ███████╗████████╗
-  ██╔════╝╚══██╔══╝██╔══██╗██╔══██╗██║     ██╔════╝╚══██╔══╝
-  ███████╗   ██║   ███████║██████╔╝██║     █████╗     ██║
-  ╚════██║   ██║   ██╔══██║██╔══██╗██║     ██╔══╝     ██║
-  ███████║   ██║   ██║  ██║██║  ██║███████╗███████╗   ██║
-  ╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝   ╚═╝
-`
-	logoArtColor = cl.RoseWaterByColumn(logoArt)
+	//go:embed logo.txt
+	logoArt string
 )
 
 func displayBuildInfo() {
+	// is on master
+	onMaster := GitBranch == "master" || GitBranch == "main" || GitBranch == ""
+
 	// write logo
 	var sb strings.Builder
-	sb.WriteString(logoArtColor)
+	if onMaster {
+		sb.WriteString(cl.RoseWaterByColumn(logoArt))
+	} else {
+		sb.WriteString(cl.EveningNightByColumn(logoArt))
+	}
 	sb.WriteString(ystring.NewLine)
 
 	// inline helpers

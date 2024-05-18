@@ -210,6 +210,5 @@ $RECYCLE.BIN/
 # For local project settings
 *.log
 *.db
-/starlet*
 /starcli*
 /setting.*
