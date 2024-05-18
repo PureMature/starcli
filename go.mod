@@ -1,4 +1,4 @@
-module github.com/1set/starlet/cmd/starlet
+module github.com/PureMature/starcli
 
 go 1.18
 

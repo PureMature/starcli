@@ -1,4 +1,3 @@
-// A simple example of using the Starlet REPL or running a script.
 package main
 
 import (
