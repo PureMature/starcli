@@ -33,7 +33,7 @@ func displayBuildInfo() {
 	// write logo
 	var sb strings.Builder
 	if onMaster {
-		sb.WriteString(cl.CherryBlossomsByColumn(logoArt))
+		sb.WriteString(cl.RoseWaterByColumn(logoArt))
 	} else {
 		sb.WriteString(cl.EveningNightByColumn(logoArt))
 	}
