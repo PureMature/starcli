@@ -7,9 +7,11 @@ import (
 	"github.com/1set/gut/ystring"
 	"github.com/1set/starbox"
 	"github.com/PureMature/starcli/box"
+	"github.com/PureMature/starcli/web"
 	flag "github.com/spf13/pflag"
 )
 
+// runWebServer starts a web server that creates a Starbox with given code for each request.
 func runWebServer(args *Args) error {
 	var (
 		runner        = starbox.NewRunConfig()
@@ -31,19 +33,10 @@ func runWebServer(args *Args) error {
 	}
 
 	// start web server
-	gotRunner := func() *starbox.RunnerConfig {
+	build := func() *starbox.RunnerConfig {
 		return runner.Starbox(box.Build("web", args.IncludePath, args.LoadModules))
 	}
-
-	// HACK: test it
-	r := gotRunner()
-	res, err := r.Execute()
-	if err != nil {
-		return err
-	}
-	fmt.Println(webPort, res)
-
-	return nil
+	return web.Start(webPort, build)
 }
 
 func runDirectCode(args *Args) error {
