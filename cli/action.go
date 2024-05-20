@@ -33,13 +33,14 @@ func runWebServer(args *Args) error {
 
 	// start web server
 	build := func() *starbox.RunnerConfig {
-		b := BuildBox("web", args)
+		b := BuildBox("web", args.IncludePath, args.ModulesToLoad, args.Arguments)
 		return runner.Starbox(b)
 	}
 	return web.Start(webPort, build)
 }
 
 func runDirectCode(args *Args) error {
+
 	fmt.Println("runDirectCode", args)
 	return nil
 }
