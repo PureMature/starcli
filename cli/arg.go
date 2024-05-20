@@ -34,7 +34,7 @@ func ParseArgs() *Args {
 	flag.StringSliceVarP(&args.LoadModules, "module", "m", defaultModules, "Modules to load before executing Starlark code")
 	flag.StringVarP(&args.IncludePath, "include", "i", ".", "include path for Starlark code to load modules from")
 	flag.StringVarP(&args.CodeContent, "code", "c", "", "Starlark code to execute")
-	flag.Uint16VarP(&args.WebPort, "web", "w", 0, "run web server on specified port, it provides reader,writer,fprintf functions for Starlark code to use")
+	flag.Uint16VarP(&args.WebPort, "web", "w", 0, "run web server on specified port, it provides request and response structs for Starlark code to use")
 	flag.Parse()
 
 	// keep the rest of arguments

@@ -13,16 +13,20 @@ import (
 func runWebServer(args *Args) error {
 	var (
 		runner        = starbox.NewRunConfig()
+		webPort       = args.WebPort
 		numArg        = args.NumberOfArgs
 		useDirectCode = ystring.IsNotBlank(args.CodeContent)
 	)
 
 	// prepare runner
 	if useDirectCode {
+		// if code content is provided in flag, just use it
 		runner = runner.FileName("web.star").Script(args.CodeContent)
 	} else if numArg >= 1 {
+		// or use the first argument as file name
 		runner = runner.FileName(args.Arguments[0])
 	} else {
+		// no repl mode for web server, just quit if no code if provided
 		return errors.New("no code to run as web server")
 	}
 
@@ -37,7 +41,7 @@ func runWebServer(args *Args) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(args.WebPort, res)
+	fmt.Println(webPort, res)
 
 	return nil
 }
