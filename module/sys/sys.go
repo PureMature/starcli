@@ -1,4 +1,4 @@
-package main
+package sys
 
 import (
 	"bufio"
@@ -12,13 +12,13 @@ import (
 	"go.starlark.net/starlark"
 )
 
-func setMachineExtras(m *starlet.Machine, args []string) {
-	sysLoader := loadSysModule(args)
-	m.AddPreloadModules(starlet.ModuleLoaderList{sysLoader})
-	m.AddLazyloadModules(starlet.ModuleLoaderMap{"sys": sysLoader})
-}
+const (
+	// ModuleName defines the module name.
+	ModuleName = "sys"
+)
 
-func loadSysModule(args []string) func() (starlark.StringDict, error) {
+// NewModule creates a new module loader for the sys module.
+func NewModule(args []string) starlet.ModuleLoader {
 	// get sa
 	sa := make([]starlark.Value, 0, len(args))
 	for _, arg := range args {
@@ -30,9 +30,9 @@ func loadSysModule(args []string) func() (starlark.StringDict, error) {
 		"arch":     starlark.String(runtime.GOARCH),
 		"version":  starlark.MakeUint(starlark.CompilerVersion),
 		"argv":     starlark.NewList(sa),
-		"input":    starlark.NewBuiltin("sys.input", rawStdInput),
+		"input":    starlark.NewBuiltin(ModuleName+".input", rawStdInput),
 	}
-	return dataconv.WrapModuleData("sys", sd)
+	return dataconv.WrapModuleData(ModuleName, sd)
 }
 
 func rawStdInput(thread *starlark.Thread, b *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
