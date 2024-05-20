@@ -43,14 +43,17 @@ func runWebServer(args *Args) error {
 }
 
 func runDirectCode(args *Args) error {
+	fmt.Println("runDirectCode", args)
 	return nil
 }
 
 func runREPL(args *Args) error {
+	fmt.Println("runREPL", args)
 	return nil
 }
 
 func runScriptFile(args *Args) error {
+	fmt.Println("runScriptFile", args)
 	return nil
 }
 
