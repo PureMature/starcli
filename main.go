@@ -7,11 +7,12 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/PureMature/starcli/util"
+
 	"bitbucket.org/neiku/winornot"
 	"github.com/1set/gut/ystring"
 	"github.com/1set/starlet"
 	flag "github.com/spf13/pflag"
-	"go.starlark.net/starlark"
 	"golang.org/x/term"
 )
 
@@ -83,12 +84,12 @@ func processArgs() int {
 			}
 		} else {
 			// no code to run
-			PrintError(fmt.Errorf("no code to run as web server"))
+			util.PrintError(fmt.Errorf("no code to run as web server"))
 			return 1
 		}
 		// start web server
 		if err := runWebServer(webPort, setCode); err != nil {
-			PrintError(err)
+			util.PrintError(err)
 			return 1
 		}
 	case argCode:
@@ -97,7 +98,7 @@ func processArgs() int {
 		mac.SetScript("direct.star", []byte(codeContent), incFS)
 		_, err := mac.Run()
 		if err != nil {
-			PrintError(err)
+			util.PrintError(err)
 			return 1
 		}
 	case nargs == 0 && !argCode:
@@ -117,13 +118,13 @@ func processArgs() int {
 		fileName := flag.Arg(0)
 		bs, err := ioutil.ReadFile(fileName)
 		if err != nil {
-			PrintError(err)
+			util.PrintError(err)
 			return 1
 		}
 		setMachineExtras(mac, flag.Args())
 		mac.SetScript(filepath.Base(fileName), bs, incFS)
 		if _, err := mac.Run(); err != nil {
-			PrintError(err)
+			util.PrintError(err)
 			return 1
 		}
 	default:
@@ -131,14 +132,4 @@ func processArgs() int {
 		return 1
 	}
 	return 0
-}
-
-// PrintError prints the error to stderr,
-// or its backtrace if it is a Starlark evaluation error.
-func PrintError(err error) {
-	if evalErr, ok := err.(*starlark.EvalError); ok {
-		fmt.Fprintln(os.Stderr, evalErr.Backtrace())
-	} else {
-		fmt.Fprintln(os.Stderr, err)
-	}
 }
