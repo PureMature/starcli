@@ -38,7 +38,7 @@ func ParseArgs() *Args {
 	flag.StringVarP(&args.CodeContent, "code", "c", "", "Starlark code to execute")
 	flag.Uint16VarP(&args.WebPort, "web", "w", 0, "run web server on specified port, it provides request and response structs for Starlark code to use")
 	flag.StringVarP(&args.LogLevel, "log", "l", "info", "log level: debug, info, warn, error, dpanic, panic, fatal")
-	flag.BoolVar(&args.ShowVersion, "version", false, "show version information")
+	flag.BoolVar(&args.ShowVersion, "version", false, "print version & build information")
 	flag.Parse()
 
 	// keep the rest of arguments
