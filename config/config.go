@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	_ "embed"
@@ -26,7 +26,8 @@ var (
 	logoArt string
 )
 
-func displayBuildInfo() {
+// DisplayBuildInfo prints the build information to the console.
+func DisplayBuildInfo() {
 	// is on master
 	onMaster := GitBranch == "master" || GitBranch == "main" || GitBranch == ""
 
