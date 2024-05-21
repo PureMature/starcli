@@ -38,11 +38,7 @@ func runWebServer(args *Args) error {
 
 	// start web server
 	build := func() *starbox.RunnerConfig {
-		b := BuildBox("web",
-			args.IncludePath,
-			args.ModulesToLoad,
-			args.Arguments,
-		)
+		b := BuildBox("web", args.IncludePath, args.ModulesToLoad, args.Arguments, args.OutputPrinter)
 		return runner.Starbox(b)
 	}
 	return web.Start(webPort, build)
@@ -50,11 +46,7 @@ func runWebServer(args *Args) error {
 
 func runDirectCode(args *Args) error {
 	// build box and runner
-	box := BuildBox("direct",
-		args.IncludePath,
-		args.ModulesToLoad,
-		append([]string{`-c`}, args.Arguments...),
-	)
+	box := BuildBox("direct", args.IncludePath, args.ModulesToLoad, append([]string{`-c`}, args.Arguments...), args.OutputPrinter)
 	run := box.CreateRunConfig().
 		FileName("direct.star").
 		Script(args.CodeContent).
@@ -70,11 +62,7 @@ func runREPL(args *Args) error {
 	if stdinIsTerminal {
 		config.DisplayBuildInfo()
 	}
-	box := BuildBox("repl",
-		args.IncludePath,
-		args.ModulesToLoad,
-		[]string{``},
-	)
+	box := BuildBox("repl", args.IncludePath, args.ModulesToLoad, []string{``}, args.OutputPrinter)
 	err := box.REPL()
 	if stdinIsTerminal {
 		fmt.Println()
@@ -92,11 +80,7 @@ func runScriptFile(args *Args) error {
 
 	// build box and runner
 	name := filepath.Base(fileName)
-	box := BuildBox(name,
-		args.IncludePath,
-		args.ModulesToLoad,
-		args.Arguments,
-	)
+	box := BuildBox(name, args.IncludePath, args.ModulesToLoad, args.Arguments, args.OutputPrinter)
 	run := box.CreateRunConfig().
 		FileName(name).
 		Script(string(bs)).

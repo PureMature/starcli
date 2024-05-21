@@ -21,6 +21,7 @@ type Args struct {
 	LogLevel            string
 	ShowVersion         bool
 	InteractiveMode     bool
+	OutputPrinter       string
 }
 
 var (
@@ -41,6 +42,7 @@ func ParseArgs() *Args {
 	flag.StringVarP(&args.LogLevel, "log", "l", "info", "log level: debug, info, warn, error, dpanic, panic, fatal")
 	flag.BoolVarP(&args.ShowVersion, "version", "V", false, "print version & build information")
 	flag.BoolVarP(&args.InteractiveMode, "interactive", "i", false, "enter interactive mode after executing")
+	flag.StringVarP(&args.OutputPrinter, "output", "o", "auto", "output printer: none,stdout,stderr,basic,lineno,auto")
 	flag.Parse()
 
 	// keep the rest of arguments

@@ -20,11 +20,11 @@ func main() {
 	// parse args
 	args := cli.ParseArgs()
 	// set log level
-	initLogs(args.LogLevel)
+	initLogger(args.LogLevel)
 	os.Exit(cli.Process(args))
 }
 
-func initLogs(level string) {
+func initLogger(level string) {
 	lg := hlog.NewSimpleLogger()
 	if err := lg.SetLevelString(level); err != nil {
 		lg.Error(err)
