@@ -9,6 +9,7 @@ import (
 
 	"github.com/1set/gut/ystring"
 	"github.com/1set/starbox"
+	"github.com/PureMature/starcli/config"
 	"github.com/PureMature/starcli/web"
 	flag "github.com/spf13/pflag"
 	"golang.org/x/term"
@@ -60,8 +61,7 @@ func runDirectCode(args *Args) error {
 func runREPL(args *Args) error {
 	stdinIsTerminal := term.IsTerminal(int(os.Stdin.Fd()))
 	if stdinIsTerminal {
-		//displayBuildInfo() TODO: displayBuildInfo
-		fmt.Println("displayBuildInfo")
+		config.DisplayBuildInfo()
 	}
 	box := BuildBox("repl",
 		args.IncludePath,
