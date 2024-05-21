@@ -10,6 +10,7 @@ require (
 	github.com/1set/starlet v0.1.0
 	github.com/spf13/pflag v1.0.5
 	go.starlark.net v0.0.0-20240123142251-f86470692795
+	golang.org/x/term v0.0.0-20220526004731-065cf7ba2467
 )
 
 require (

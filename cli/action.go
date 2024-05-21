@@ -3,11 +3,15 @@ package cli
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 
 	"github.com/1set/gut/ystring"
 	"github.com/1set/starbox"
 	"github.com/PureMature/starcli/web"
 	flag "github.com/spf13/pflag"
+	"golang.org/x/term"
 )
 
 // runWebServer starts a web server that creates a Starbox with given code for each request.
@@ -33,26 +37,63 @@ func runWebServer(args *Args) error {
 
 	// start web server
 	build := func() *starbox.RunnerConfig {
-		b := BuildBox("web", args.IncludePath, args.ModulesToLoad, args.Arguments)
+		b := BuildBox("web",
+			args.IncludePath,
+			args.ModulesToLoad,
+			args.Arguments,
+		)
 		return runner.Starbox(b)
 	}
 	return web.Start(webPort, build)
 }
 
 func runDirectCode(args *Args) error {
-
-	fmt.Println("runDirectCode", args)
-	return nil
+	box := BuildBox("direct",
+		args.IncludePath,
+		args.ModulesToLoad,
+		append([]string{`-c`}, args.Arguments...),
+	)
+	_, err := box.Run(args.CodeContent)
+	return err
 }
 
 func runREPL(args *Args) error {
-	fmt.Println("runREPL", args)
-	return nil
+	stdinIsTerminal := term.IsTerminal(int(os.Stdin.Fd()))
+	if stdinIsTerminal {
+		//displayBuildInfo() TODO: displayBuildInfo
+		fmt.Println("displayBuildInfo")
+	}
+	box := BuildBox("repl",
+		args.IncludePath,
+		args.ModulesToLoad,
+		[]string{``},
+	)
+	err := box.REPL()
+	if stdinIsTerminal {
+		fmt.Println()
+	}
+	return err
 }
 
 func runScriptFile(args *Args) error {
-	fmt.Println("runScriptFile", args)
-	return nil
+	// load file
+	fileName := args.Arguments[0]
+	bs, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		return err
+	}
+	// build and run
+	name := filepath.Base(fileName)
+	box := BuildBox(name,
+		args.IncludePath,
+		args.ModulesToLoad,
+		args.Arguments,
+	)
+	_, err = box.CreateRunConfig().
+		FileName(name).
+		Script(string(bs)).
+		Execute()
+	return err
 }
 
 func showHelp(args *Args) error {
