@@ -42,7 +42,12 @@ func BuildBox(opts *BoxOpts) (*starbox.Starbox, error) {
 	if ystring.IsNotBlank(opts.includePath) {
 		box.SetFS(os.DirFS(opts.includePath))
 	}
-	box.SetPrintFunc(getPrinterFunc(opts.name, opts.printerName))
+	// set print function: TODO: for scenario, and throw errors
+	pf, err := getPrinterFunc(opts.scenario, opts.printerName)
+	if err != nil {
+		return nil, err
+	}
+	box.SetPrintFunc(pf)
 	// add default modules
 	box.AddModuleLoader(sys.ModuleName, sys.NewModule(opts.cmdArgs))
 	return box, nil
@@ -64,28 +69,44 @@ func genInspectCond(inspect bool) starbox.InspectCondFunc {
 }
 
 // getPrinterFunc returns a function to print output based on the given printer name.
-func getPrinterFunc(name, printer string) func(*starlark.Thread, string) {
-	switch strings.ToLower(strings.TrimSpace(printer)) {
+func getPrinterFunc(sc scenarioCode, printer string) (starlet.PrintFunc, error) {
+	// normalize printer name
+	pn := strings.ToLower(strings.TrimSpace(printer))
+	if pn == "auto" {
+		switch sc {
+		case scenarioREPL:
+			pn = "stdout"
+		case scenarioDirect:
+			pn = "stdout"
+		case scenarioFile:
+			pn = "linenum"
+		case scenarioWeb:
+			pn = "basic"
+		}
+	}
+	// switch based on name
+	switch pn {
 	case "none", "nil", "no":
-		return func(thread *starlark.Thread, msg string) {}
+		return func(thread *starlark.Thread, msg string) {}, nil
 	case "stdout":
 		return func(thread *starlark.Thread, msg string) {
 			fmt.Println(msg)
-		}
+		}, nil
 	case "stderr":
 		return func(thread *starlark.Thread, msg string) {
 			fmt.Fprintln(os.Stderr, msg)
-		}
+		}, nil
 	case "basic":
-		return nil
+		// nil means using the default print function provided by Starbox
+		return nil, nil
 	case "lineno", "linenum":
 		cnt := atomic.NewInt64(0)
 		return func(thread *starlark.Thread, msg string) {
 			//prefix := fmt.Sprintf("%04d [⭐|%s](%s)", cnt.Inc(), name, time.Now().UTC().Format(`15:04:05.000`))
 			prefix := fmt.Sprintf("[%04d](%s)", cnt.Inc(), time.Now().UTC().Format(`15:04:05.000`))
 			fmt.Fprintln(os.Stderr, prefix, msg)
-		}
+		}, nil
 	default:
-		return nil
+		return nil, fmt.Errorf("unknown printer name: %s", printer)
 	}
 }
