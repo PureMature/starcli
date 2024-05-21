@@ -2,12 +2,12 @@ package web
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/1set/starbox"
 	"github.com/1set/starlet"
 	shttp "github.com/1set/starlet/lib/http"
+	"go.uber.org/zap"
 )
 
 // Start starts a web server on the given port, builds and runs a Starbox instance for each request.
@@ -26,11 +26,11 @@ func Start(port uint16, builder func() *starbox.RunnerConfig) error {
 
 		// handle error
 		if err != nil {
-			log.Printf("Runtime Error: %v\n", err)
+			log.Warnw("fail to execute code", zap.Error(err))
 			w.Header().Set("Content-Type", "text/plain")
 			w.WriteHeader(http.StatusInternalServerError)
 			if _, err := fmt.Fprintf(w, "Runtime Error: %v", err); err != nil {
-				log.Printf("Error writing response: %v", err)
+				log.Warnw("fail to write response", zap.Error(err))
 			}
 			return
 		}
@@ -43,10 +43,10 @@ func Start(port uint16, builder func() *starbox.RunnerConfig) error {
 		}
 	})
 
-	log.Printf("Server is starting on port: %d\n", port)
+	log.Infow("web server started", "port", port)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", port), mux)
 	if err != nil {
-		log.Fatalf("Server failed to start: %v", err)
+		log.Fatalw("fail to start web server", zap.Error(err))
 	}
 	return err
 }

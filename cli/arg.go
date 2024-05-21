@@ -18,6 +18,9 @@ type Args struct {
 	WebPort             uint16
 	NumberOfArgs        int
 	Arguments           []string
+	LogLevel            string
+	ShowVersion         bool
+	InteractiveMode     bool
 }
 
 var (
@@ -32,9 +35,12 @@ func ParseArgs() *Args {
 	flag.BoolVarP(&args.AllowRecursion, "recursion", "r", false, "allow recursion in Starlark code")
 	flag.BoolVarP(&args.AllowGlobalReassign, "globalreassign", "g", false, "allow reassigning global variables in Starlark code")
 	flag.StringSliceVarP(&args.ModulesToLoad, "module", "m", defaultModules, "Modules to load before executing Starlark code")
-	flag.StringVarP(&args.IncludePath, "include", "i", ".", "include path for Starlark code to load modules from")
+	flag.StringVarP(&args.IncludePath, "include", "I", ".", "include path for Starlark code to load modules from")
 	flag.StringVarP(&args.CodeContent, "code", "c", "", "Starlark code to execute")
 	flag.Uint16VarP(&args.WebPort, "web", "w", 0, "run web server on specified port, it provides request and response structs for Starlark code to use")
+	flag.StringVarP(&args.LogLevel, "log", "l", "info", "log level: debug, info, warn, error, dpanic, panic, fatal")
+	flag.BoolVarP(&args.ShowVersion, "version", "V", false, "print version & build information")
+	flag.BoolVarP(&args.InteractiveMode, "interactive", "i", false, "enter interactive mode after executing")
 	flag.Parse()
 
 	// keep the rest of arguments
@@ -52,6 +58,8 @@ func Process(args *Args) int {
 	// determine action
 	var action func(*Args) error
 	switch {
+	case args.ShowVersion:
+		action = showVersion
 	case args.WebPort > 0:
 		action = runWebServer
 	case useDirectCode:
