@@ -43,7 +43,7 @@ func Start(port uint16, builder func() *starbox.RunnerConfig) error {
 		}
 	})
 
-	log.Infof("web server started on port %d", port)
+	log.Infow("web server started", "port", port)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", port), mux)
 	if err != nil {
 		log.Fatalw("fail to start web server", zap.Error(err))

@@ -18,6 +18,7 @@ type Args struct {
 	WebPort             uint16
 	NumberOfArgs        int
 	Arguments           []string
+	LogLevel            string
 }
 
 var (
@@ -35,6 +36,7 @@ func ParseArgs() *Args {
 	flag.StringVarP(&args.IncludePath, "include", "i", ".", "include path for Starlark code to load modules from")
 	flag.StringVarP(&args.CodeContent, "code", "c", "", "Starlark code to execute")
 	flag.Uint16VarP(&args.WebPort, "web", "w", 0, "run web server on specified port, it provides request and response structs for Starlark code to use")
+	flag.StringVarP(&args.LogLevel, "log", "l", "info", "log level: debug, info, warn, error, dpanic, panic, fatal")
 	flag.Parse()
 
 	// keep the rest of arguments
