@@ -49,12 +49,19 @@ func runWebServer(args *Args) error {
 }
 
 func runDirectCode(args *Args) error {
+	// build box and runner
 	box := BuildBox("direct",
 		args.IncludePath,
 		args.ModulesToLoad,
 		append([]string{`-c`}, args.Arguments...),
 	)
-	_, err := box.Run(args.CodeContent)
+	run := box.CreateRunConfig().
+		FileName("direct.star").
+		Script(args.CodeContent).
+		Inspect(args.InteractiveMode)
+
+	// run script
+	_, err := run.Execute()
 	return err
 }
 
@@ -82,17 +89,21 @@ func runScriptFile(args *Args) error {
 	if err != nil {
 		return err
 	}
-	// build and run
+
+	// build box and runner
 	name := filepath.Base(fileName)
 	box := BuildBox(name,
 		args.IncludePath,
 		args.ModulesToLoad,
 		args.Arguments,
 	)
-	_, err = box.CreateRunConfig().
+	run := box.CreateRunConfig().
 		FileName(name).
 		Script(string(bs)).
-		Execute()
+		Inspect(args.InteractiveMode)
+
+	// run script
+	_, err = run.Execute()
 	return err
 }
 
