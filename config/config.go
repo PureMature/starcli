@@ -41,7 +41,7 @@ func DisplayBuildInfo() {
 	sb.WriteString(ystring.NewLine)
 
 	// inline helpers
-	arrow := "➣ "
+	arrow := "✰ "
 	if yos.IsOnWindows() {
 		arrow = "> "
 	}
