@@ -23,8 +23,8 @@ func BuildBox(name, inclPath string, modules, args []string) *starbox.Starbox {
 	return box
 }
 
-// genInspectCF creates a function for Starbox runner to inspect the result.
-func genInspectCF(inspect bool) starbox.InspectCondFunc {
+// genInspectCond creates a function for Starbox runner to inspect the result.
+func genInspectCond(inspect bool) starbox.InspectCondFunc {
 	if inspect {
 		return func(m starlet.StringAnyMap, err error) bool {
 			if err != nil {

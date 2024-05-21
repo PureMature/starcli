@@ -58,7 +58,7 @@ func runDirectCode(args *Args) error {
 	run := box.CreateRunConfig().
 		FileName("direct.star").
 		Script(args.CodeContent).
-		InspectCond(genInspectCF(args.InteractiveMode))
+		InspectCond(genInspectCond(args.InteractiveMode))
 
 	// run script
 	_, err := run.Execute()
@@ -100,7 +100,7 @@ func runScriptFile(args *Args) error {
 	run := box.CreateRunConfig().
 		FileName(name).
 		Script(string(bs)).
-		InspectCond(genInspectCF(args.InteractiveMode))
+		InspectCond(genInspectCond(args.InteractiveMode))
 
 	// run script
 	_, err = run.Execute()

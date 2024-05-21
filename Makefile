@@ -51,6 +51,7 @@ run: build
 	./$(BINARY)
 
 preview:
+	./$(BINARY) --version
 	./$(BINARY) arg.star Aloha -- -h 1
 
 install:
