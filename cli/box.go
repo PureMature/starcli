@@ -15,18 +15,37 @@ import (
 	"go.uber.org/atomic"
 )
 
-// BuildBox creates a new Starbox with the given name, include path, and modules.
-func BuildBox(name, inclPath string, modules, args []string, printer string) *starbox.Starbox {
+type scenarioCode uint
+
+const (
+	scenarioREPL scenarioCode = iota + 1
+	scenarioDirect
+	scenarioFile
+	scenarioWeb
+)
+
+// BoxOpts defines the options for creating a new Starbox instance.
+type BoxOpts struct {
+	scenario     scenarioCode
+	name         string
+	includePath  string
+	moduleToLoad []string
+	cmdArgs      []string
+	printerName  string
+}
+
+// BuildBox creates a new Starbox with the given options.
+func BuildBox(opts *BoxOpts) (*starbox.Starbox, error) {
 	// create a new Starbox instance
-	box := starbox.New(name)
-	box.AddNamedModules(modules...)
-	if ystring.IsNotBlank(inclPath) {
-		box.SetFS(os.DirFS(inclPath))
+	box := starbox.New(opts.name)
+	box.AddNamedModules(opts.moduleToLoad...)
+	if ystring.IsNotBlank(opts.includePath) {
+		box.SetFS(os.DirFS(opts.includePath))
 	}
-	box.SetPrintFunc(getPrinterFunc(name, printer))
+	box.SetPrintFunc(getPrinterFunc(opts.name, opts.printerName))
 	// add default modules
-	box.AddModuleLoader(sys.ModuleName, sys.NewModule(args))
-	return box
+	box.AddModuleLoader(sys.ModuleName, sys.NewModule(opts.cmdArgs))
+	return box, nil
 }
 
 // genInspectCond creates a function for Starbox runner to inspect the result.
