@@ -1,3 +1,4 @@
+// Package sys provides a Starlark module that exposes runtime information and arguments, and functions to interact with the system.
 package sys
 
 import (
