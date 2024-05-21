@@ -96,6 +96,11 @@ func runScriptFile(args *Args) error {
 	return err
 }
 
+func showVersion(args *Args) error {
+	config.DisplayBuildInfo()
+	return nil
+}
+
 func showHelp(args *Args) error {
 	flag.Usage()
 	return nil
