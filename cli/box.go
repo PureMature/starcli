@@ -42,14 +42,17 @@ func BuildBox(opts *BoxOpts) (*starbox.Starbox, error) {
 	if ystring.IsNotBlank(opts.includePath) {
 		box.SetFS(os.DirFS(opts.includePath))
 	}
+
 	// set print function: TODO: for scenario, and throw errors
 	pf, err := getPrinterFunc(opts.scenario, opts.printerName)
 	if err != nil {
 		return nil, err
 	}
 	box.SetPrintFunc(pf)
+
 	// add default modules
 	box.AddModuleLoader(sys.ModuleName, sys.NewModule(opts.cmdArgs))
+
 	return box, nil
 }
 

@@ -2,7 +2,6 @@ package cli
 
 import (
 	"github.com/1set/gut/ystring"
-	"github.com/1set/starlet"
 	"github.com/PureMature/starcli/util"
 	flag "github.com/spf13/pflag"
 )
@@ -24,10 +23,6 @@ type Args struct {
 	OutputPrinter       string
 }
 
-var (
-	defaultModules = starlet.GetAllBuiltinModuleNames()
-)
-
 // ParseArgs parses command line arguments and returns the Args object.
 func ParseArgs() *Args {
 	args := &Args{}
@@ -35,7 +30,7 @@ func ParseArgs() *Args {
 	// parse command line arguments
 	flag.BoolVarP(&args.AllowRecursion, "recursion", "r", false, "allow recursion in Starlark code")
 	flag.BoolVarP(&args.AllowGlobalReassign, "globalreassign", "g", false, "allow reassigning global variables in Starlark code")
-	flag.StringSliceVarP(&args.ModulesToLoad, "module", "m", defaultModules, "Modules to load before executing Starlark code")
+	flag.StringSliceVarP(&args.ModulesToLoad, "module", "m", getDefaultModules(), "Modules to load before executing Starlark code")
 	flag.StringVarP(&args.IncludePath, "include", "I", ".", "include path for Starlark code to load modules from")
 	flag.StringVarP(&args.CodeContent, "code", "c", "", "Starlark code to execute")
 	flag.Uint16VarP(&args.WebPort, "web", "w", 0, "run web server on specified port, it provides request and response structs for Starlark code to use")
