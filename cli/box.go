@@ -50,7 +50,7 @@ func BuildBox(opts *BoxOpts) (*starbox.Starbox, error) {
 	box.SetPrintFunc(pf)
 
 	// load modules
-	if err := loadModules(box, opts, getDefaultModules()); err != nil {
+	if err := loadModules(box, opts); err != nil {
 		return nil, err
 	}
 

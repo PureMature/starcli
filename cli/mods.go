@@ -25,7 +25,8 @@ func getDefaultModules() []string {
 }
 
 // loadModules loads the given modules into the Starbox instance.
-func loadModules(box *starbox.Starbox, opts *BoxOpts, usrMods []string) error {
+func loadModules(box *starbox.Starbox, opts *BoxOpts) error {
+	usrMods := opts.moduleToLoad
 	if len(usrMods) == 0 {
 		// no modules to load
 		log.Debugw("no modules to load", "user_modules", usrMods)
