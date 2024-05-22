@@ -37,7 +37,6 @@ type BoxOpts struct {
 func BuildBox(opts *BoxOpts) (*starbox.Starbox, error) {
 	// create a new Starbox instance
 	box := starbox.New(opts.name)
-	box.AddNamedModules(opts.moduleToLoad...)
 	if ystring.IsNotBlank(opts.includePath) {
 		box.SetFS(os.DirFS(opts.includePath))
 	}
@@ -50,10 +49,10 @@ func BuildBox(opts *BoxOpts) (*starbox.Starbox, error) {
 	box.SetPrintFunc(pf)
 
 	// load modules
+	box.SetModuleSet(starbox.EmptyModuleSet)
 	if err := loadModules(box, opts); err != nil {
 		return nil, err
 	}
-
 	return box, nil
 }
 
