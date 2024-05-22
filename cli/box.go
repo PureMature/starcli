@@ -49,7 +49,7 @@ func BuildBox(opts *BoxOpts) (*starbox.Starbox, error) {
 	box.SetPrintFunc(pf)
 
 	// load modules
-	box.SetModuleSet(starbox.EmptyModuleSet)
+	box.SetModuleSet(starbox.EmptyModuleSet) // force clean the module set
 	if err := loadModules(box, opts); err != nil {
 		return nil, err
 	}
