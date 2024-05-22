@@ -9,7 +9,6 @@ import (
 	"github.com/1set/gut/ystring"
 	"github.com/1set/starbox"
 	"github.com/1set/starlet"
-	"github.com/PureMature/starcli/module/sys"
 	"github.com/PureMature/starcli/util"
 	"go.starlark.net/starlark"
 	"go.uber.org/atomic"
@@ -50,8 +49,10 @@ func BuildBox(opts *BoxOpts) (*starbox.Starbox, error) {
 	}
 	box.SetPrintFunc(pf)
 
-	// add default modules
-	box.AddModuleLoader(sys.ModuleName, sys.NewModule(opts.cmdArgs))
+	// load modules
+	if err := loadModules(box, opts, getDefaultModules()); err != nil {
+		return nil, err
+	}
 
 	return box, nil
 }

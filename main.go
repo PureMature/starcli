@@ -31,6 +31,7 @@ func initLogger(level string) {
 	}
 	log := lg.SugaredLogger.With(zap.Int("pid", os.Getpid()))
 	// set log for sub-packages
+	cli.SetLog(log)
 	web.SetLog(log)
 	sys.SetLog(log)
 }
