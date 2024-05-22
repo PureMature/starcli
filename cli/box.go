@@ -1,26 +1,59 @@
 package cli
 
 import (
+	"fmt"
 	"os"
+	"strings"
+	"time"
 
 	"github.com/1set/gut/ystring"
 	"github.com/1set/starbox"
 	"github.com/1set/starlet"
-	"github.com/PureMature/starcli/module/sys"
 	"github.com/PureMature/starcli/util"
+	"go.starlark.net/starlark"
+	"go.uber.org/atomic"
 )
 
-// BuildBox creates a new Starbox with the given name, include path, and modules.
-func BuildBox(name, inclPath string, modules, args []string) *starbox.Starbox {
+type scenarioCode uint
+
+const (
+	scenarioREPL scenarioCode = iota + 1
+	scenarioDirect
+	scenarioFile
+	scenarioWeb
+)
+
+// BoxOpts defines the options for creating a new Starbox instance.
+type BoxOpts struct {
+	scenario     scenarioCode
+	name         string
+	includePath  string
+	moduleToLoad []string
+	cmdArgs      []string
+	printerName  string
+}
+
+// BuildBox creates a new Starbox with the given options.
+func BuildBox(opts *BoxOpts) (*starbox.Starbox, error) {
 	// create a new Starbox instance
-	box := starbox.New(name)
-	box.AddNamedModules(modules...)
-	if ystring.IsNotBlank(inclPath) {
-		box.SetFS(os.DirFS(inclPath))
+	box := starbox.New(opts.name)
+	if ystring.IsNotBlank(opts.includePath) {
+		box.SetFS(os.DirFS(opts.includePath))
 	}
-	// add default modules
-	box.AddModuleLoader(sys.ModuleName, sys.NewModule(args))
-	return box
+
+	// set print function: TODO: for scenario, and throw errors
+	pf, err := getPrinterFunc(opts.scenario, opts.printerName)
+	if err != nil {
+		return nil, err
+	}
+	box.SetPrintFunc(pf)
+
+	// load modules
+	box.SetModuleSet(starbox.EmptyModuleSet) // force clean the module set
+	if err := loadModules(box, opts); err != nil {
+		return nil, err
+	}
+	return box, nil
 }
 
 // genInspectCond creates a function for Starbox runner to inspect the result.
@@ -35,5 +68,48 @@ func genInspectCond(inspect bool) starbox.InspectCondFunc {
 	}
 	return func(starlet.StringAnyMap, error) bool {
 		return false
+	}
+}
+
+// getPrinterFunc returns a function to print output based on the given printer name.
+func getPrinterFunc(sc scenarioCode, printer string) (starlet.PrintFunc, error) {
+	// normalize printer name
+	pn := strings.ToLower(strings.TrimSpace(printer))
+	if pn == "auto" {
+		switch sc {
+		case scenarioREPL:
+			pn = "stdout"
+		case scenarioDirect:
+			pn = "stdout"
+		case scenarioFile:
+			pn = "linenum"
+		case scenarioWeb:
+			pn = "basic"
+		}
+	}
+	// switch based on name
+	switch pn {
+	case "none", "nil", "no":
+		return func(thread *starlark.Thread, msg string) {}, nil
+	case "stdout":
+		return func(thread *starlark.Thread, msg string) {
+			fmt.Println(msg)
+		}, nil
+	case "stderr":
+		return func(thread *starlark.Thread, msg string) {
+			fmt.Fprintln(os.Stderr, msg)
+		}, nil
+	case "basic":
+		// nil means using the default print function provided by Starbox
+		return nil, nil
+	case "lineno", "linenum":
+		cnt := atomic.NewInt64(0)
+		return func(thread *starlark.Thread, msg string) {
+			//prefix := fmt.Sprintf("%04d [⭐|%s](%s)", cnt.Inc(), name, time.Now().UTC().Format(`15:04:05.000`))
+			prefix := fmt.Sprintf("[%04d](%s)", cnt.Inc(), time.Now().UTC().Format(`15:04:05.000`))
+			fmt.Fprintln(os.Stderr, prefix, msg)
+		}, nil
+	default:
+		return nil, fmt.Errorf("unknown printer name: %s", printer)
 	}
 }
