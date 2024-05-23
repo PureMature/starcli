@@ -33,7 +33,7 @@ func main() {
 	if err := config.InitConfig(args.ConfigFile); err != nil {
 		log.Fatalw("fail to load config", zap.Error(err))
 	}
-	log.Debugw("config loaded", "config_file", viper.ConfigFileUsed(), "host_name", config.GetHostName())
+	log.Debugw("config loaded", "config_file", viper.ConfigFileUsed(), "host_name", config.GetHostname())
 
 	// main
 	os.Exit(cli.Process(args))

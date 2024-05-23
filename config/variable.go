@@ -12,7 +12,7 @@ func SetDefaults() {
 	viper.SetDefault("host_name", host)
 }
 
-// GetHostName returns the host name from the configuration.
-func GetHostName() string {
+// GetHostname returns the host name from the configuration.
+func GetHostname() string {
 	return viper.GetString("host_name")
 }
