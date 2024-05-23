@@ -6,9 +6,15 @@ import (
 	"bitbucket.org/neiku/hlog"
 	"bitbucket.org/neiku/winornot"
 	"github.com/PureMature/starcli/cli"
+	"github.com/PureMature/starcli/config"
 	"github.com/PureMature/starcli/module/sys"
 	"github.com/PureMature/starcli/web"
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
+)
+
+var (
+	log *zap.SugaredLogger
 )
 
 func init() {
@@ -19,17 +25,28 @@ func init() {
 func main() {
 	// parse args
 	args := cli.ParseArgs()
+
 	// set log level
 	initLogger(args.LogLevel)
+
+	// load config
+	if err := config.InitConfig(args.ConfigFile); err != nil {
+		log.Fatalw("fail to load config", zap.Error(err))
+	}
+	log.Debugw("config loaded", "config_file", viper.ConfigFileUsed(), "host_name", config.GetHostName())
+
+	// main
 	os.Exit(cli.Process(args))
 }
 
 func initLogger(level string) {
+	// build root logger
 	lg := hlog.NewSimpleLogger()
 	if err := lg.SetLevelString(level); err != nil {
 		lg.Error(err)
 	}
-	log := lg.SugaredLogger.With(zap.Int("pid", os.Getpid()))
+	log = lg.SugaredLogger.With(zap.Int("pid", os.Getpid()))
+
 	// set log for sub-packages
 	cli.SetLog(log)
 	web.SetLog(log)

@@ -30,7 +30,7 @@ func InitConfig(configPath string) error {
 
 	// set default values
 	viper.SetTypeByDefaultValue(true)
-	// TODO: set default values
+	SetDefaults()
 
 	// read in environment variables that match
 	viper.AutomaticEnv()
