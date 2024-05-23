@@ -12,7 +12,7 @@ import (
 
 // revive:disable:exported
 var (
-	AppName    = "starcli"
+	AppName    string
 	CIBuildNum string
 	BuildDate  string
 	BuildHost  string
