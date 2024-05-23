@@ -1,33 +1,53 @@
 package config
 
 import (
-	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+
 	"github.com/spf13/viper"
-	"log"
 )
 
-func InitConfig(configPath string) {
-	viper.SetConfigName("config") // Default configuration file name (without extension)
-	viper.SetConfigType("yaml")   // Default configuration file format
-	viper.AddConfigPath(".")      // Look for the config in the current directory
-	viper.AddConfigPath("$HOME")  // Look for the config in the user's home directory
-
-	// If a specific config file is provided, use it
+// InitConfig initializes the configuration with the given path.
+func InitConfig(configPath string) error {
 	if configPath != "" {
+		// use the provided config file
 		viper.SetConfigFile(configPath)
+	} else {
+		// try to find home and config directories
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return err
+		}
+		configDir := filepath.Join(home, ".config", AppName)
+
+		// search config in current and config directory with name app name (without extension)
+		viper.AddConfigPath(".")
+		viper.AddConfigPath(configDir)
+		viper.SetConfigType("yaml")
+		viper.SetConfigName("config")
 	}
 
-	// Read the configuration file
+	// set default values
+	viper.SetTypeByDefaultValue(true)
+	// TODO: set default values
+
+	// read in environment variables that match
+	viper.AutomaticEnv()
+	replacer := strings.NewReplacer("-", "_")
+	viper.SetEnvKeyReplacer(replacer)
+	viper.SetEnvPrefix(AppName)
+
+	// read the configuration file
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			// Config file not found; ignore error if desired
-			fmt.Println("No config file found, using defaults and environment variables")
 		} else {
 			// Config file was found but another error was produced
-			log.Fatalf("Error reading config file: %s", err)
+			return err
 		}
 	}
 
-	// Allow environment variables to override configuration settings
-	viper.AutomaticEnv()
+	// done
+	return nil
 }
