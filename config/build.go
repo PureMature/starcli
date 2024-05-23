@@ -12,6 +12,7 @@ import (
 
 // revive:disable:exported
 var (
+	AppName    string
 	CIBuildNum string
 	BuildDate  string
 	BuildHost  string

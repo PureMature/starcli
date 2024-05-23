@@ -21,6 +21,7 @@ type Args struct {
 	ShowVersion         bool
 	InteractiveMode     bool
 	OutputPrinter       string
+	ConfigFile          string
 }
 
 // ParseArgs parses command line arguments and returns the Args object.
@@ -38,6 +39,7 @@ func ParseArgs() *Args {
 	flag.BoolVarP(&args.ShowVersion, "version", "V", false, "print version & build information")
 	flag.BoolVarP(&args.InteractiveMode, "interactive", "i", false, "enter interactive mode after executing")
 	flag.StringVarP(&args.OutputPrinter, "output", "o", "auto", "output printer: none,stdout,stderr,basic,lineno,auto")
+	flag.StringVarP(&args.ConfigFile, "config", "C", "", "config file to load")
 	flag.Parse()
 
 	// keep the rest of arguments

@@ -10,6 +10,7 @@ import (
 
 	"github.com/1set/starlet"
 	"github.com/1set/starlet/dataconv"
+	"github.com/PureMature/starcli/config"
 	"go.starlark.net/starlark"
 )
 
@@ -32,6 +33,7 @@ func NewModule(args []string) starlet.ModuleLoader {
 		"version":  starlark.MakeUint(starlark.CompilerVersion),
 		"argv":     starlark.NewList(sa),
 		"input":    starlark.NewBuiltin(ModuleName+".input", rawStdInput),
+		"host":     starlark.String(config.GetHostname()),
 	}
 	return dataconv.WrapModuleData(ModuleName, sd)
 }
