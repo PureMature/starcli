@@ -36,7 +36,7 @@ func InitConfig(configPath string) error {
 	viper.AutomaticEnv()
 	replacer := strings.NewReplacer("-", "_")
 	viper.SetEnvKeyReplacer(replacer)
-	viper.SetEnvPrefix(AppName)
+	viper.SetEnvPrefix(`star`)
 
 	// read the configuration file
 	if err := viper.ReadInConfig(); err != nil {

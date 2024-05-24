@@ -51,8 +51,7 @@ run: build
 	./$(BINARY)
 
 preview:
-	./$(BINARY) --version
-	./$(BINARY) arg.star Aloha -- -h 1
+	STAR_HOST_NAME=Aloha ./$(BINARY) --version --log debug
 
 install:
 ifndef GOBIN

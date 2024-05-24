@@ -211,4 +211,5 @@ $RECYCLE.BIN/
 *.log
 *.db
 /starcli*
-/setting.*
+/*.yaml
+/*.star
