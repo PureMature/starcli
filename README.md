@@ -1,4 +1,4 @@
-# StarCLI
+# :stars: StarCLI
 
 StarCLI is a command-line interface for executing Starlark scripts with various options for configuration, logging, and module inclusion.
 
