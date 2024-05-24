@@ -10,12 +10,16 @@ Download the executable from the [releases page](https://github.com/PureMature/s
 
 ### macOS
 
+Run the following commands in your terminal:
+
 ```sh
 curl -sSL https://github.com/PureMature/starcli/releases/download/b2/starcli.macos -o starcli
 install -m 0755 starcli /usr/local/bin
 ```
 
 ### Linux
+
+Run the following commands in your terminal:
 
 ```sh
 curl -sSL https://github.com/PureMature/starcli/releases/download/b2/starcli.linux -o starcli
@@ -41,6 +45,13 @@ Usage of ./starcli:
   -V, --version          Print version & build information
   -w, --web uint16       Run web server on specified port, it provides request and response structs for Starlark code to use
 ```
+
+### Examples
+
+- **Start REPL Mode:** `starcli`
+- **Execute Starlark Code:** `starcli -c 'print("Hello, World!")'`
+- **Enter Interactive Mode After Execution:** `starcli -c 's = "Hello, World!"' -i`
+- **Execute Starlark Code with Log Level:** `starcli --log debug test.star`
 
 ## License
 
