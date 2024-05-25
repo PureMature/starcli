@@ -6,6 +6,8 @@ import (
 
 	"github.com/1set/starbox"
 	"github.com/1set/starlet"
+	"github.com/PureMature/starcli/config"
+	"github.com/PureMature/starcli/module/email"
 	"github.com/PureMature/starcli/module/sys"
 	"github.com/samber/lo"
 )
@@ -14,6 +16,7 @@ var (
 	starMods = starlet.GetAllBuiltinModuleNames()
 	cliMods  = []string{
 		sys.ModuleName,
+		email.ModuleName,
 	}
 )
 
@@ -69,6 +72,8 @@ func loadCLIModuleByName(opts *BoxOpts, name string) (starlet.ModuleLoader, erro
 	switch name {
 	case sys.ModuleName:
 		return sys.NewModule(opts.cmdArgs), nil
+	case email.ModuleName:
+		return email.NewModule(config.GetResendAPIKey, config.GetSenderDomain), nil
 	default:
 		return nil, fmt.Errorf("unknown module: %s", name)
 	}
