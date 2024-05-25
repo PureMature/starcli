@@ -46,7 +46,7 @@ func (s *OneOrMany[T]) Len() int {
 	return len(*s)
 }
 
-func (s *OneOrMany[T]) Values() []T {
+func (s *OneOrMany[T]) Slice() []T {
 	if s == nil {
 		return []T{}
 	}

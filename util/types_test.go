@@ -45,8 +45,8 @@ func TestOneOrMany_Unpack(t *testing.T) {
 			if tt.wantNull != p.IsNull() {
 				t.Errorf("Nullable[%s].IsNull() got = %v, want %v", n, p.IsNull(), tt.wantNull)
 			}
-			if !reflect.DeepEqual(p.Values(), tt.want) {
-				t.Errorf("Nullable[%s].Unpack() got = %v, want %v", n, p.Values(), tt.want)
+			if !reflect.DeepEqual(p.Slice(), tt.want) {
+				t.Errorf("Nullable[%s].Unpack() got = %v, want %v", n, p.Slice(), tt.want)
 			}
 		})
 	}
