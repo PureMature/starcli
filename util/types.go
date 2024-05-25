@@ -6,30 +6,40 @@ import (
 	"go.starlark.net/starlark"
 )
 
-// OneOrMany encapsulates a slice of a specific type with optional default values.
+// OneOrMany is a struct that can hold either a single value or multiple values of a specific type.
 type OneOrMany[T starlark.Value] struct {
 	values       []T
 	defaultValue T
+	hasDefault   bool
 }
 
 // NewOneOrMany creates and returns a new OneOrMany with the given default value.
 func NewOneOrMany[T starlark.Value](defaultValue T) *OneOrMany[T] {
-	return &OneOrMany[T]{values: nil, defaultValue: defaultValue}
+	return &OneOrMany[T]{values: nil, defaultValue: defaultValue, hasDefault: true}
 }
 
-// Unpack implements the starlark.Value interface.
+// NewOneOrManyNoDefault creates and returns a new OneOrMany without a default value.
+func NewOneOrManyNoDefault[T starlark.Value]() *OneOrMany[T] {
+	return &OneOrMany[T]{values: nil, hasDefault: false}
+}
+
+// Unpack implements the starlark.Unpacker interface, allowing the struct to unpack from a starlark.Value.
 func (o *OneOrMany[T]) Unpack(v starlark.Value) error {
 	if o == nil {
-		return fmt.Errorf("nil OneOrMany pointer")
+		return fmt.Errorf("nil receiver")
 	}
 	if _, ok := v.(starlark.NoneType); ok {
+		// None
 		o.values = nil
 	} else if t, ok := v.(T); ok {
+		// Single value
 		o.values = []T{t}
 	} else if l, ok := v.(starlark.Iterable); ok {
-		sl := make([]T, 0)
+		// List or Tuple or Set of values
+		sl := make([]T, 0, 1)
 		iter := l.Iterate()
 		defer iter.Done()
+		// Iterate over the iterable
 		var x starlark.Value
 		for iter.Next(&x) {
 			if t, ok := x.(T); ok {
@@ -45,31 +55,38 @@ func (o *OneOrMany[T]) Unpack(v starlark.Value) error {
 	return nil
 }
 
-// IsNull checks if the OneOrMany is considered null (having no values).
+// IsNull checks if the underlying slice is nil.
 func (o *OneOrMany[T]) IsNull() bool {
-	return o == nil || len(o.values) == 0
+	return o == nil || o.values == nil
 }
 
-// Len returns the number of elements in OneOrMany.
+// Len returns the length of the underlying slice.
 func (o *OneOrMany[T]) Len() int {
-	if o.IsNull() {
+	if o.values == nil {
 		return 0
 	}
 	return len(o.values)
 }
 
-// Slice returns the underlying slice of values.
+// Slice returns the underlying slice, or a slice containing the default value if the slice is nil and a default is set.
 func (o *OneOrMany[T]) Slice() []T {
-	if o.IsNull() {
+	if o.values == nil {
+		if o.hasDefault {
+			return []T{o.defaultValue}
+		}
 		return []T{}
 	}
 	return o.values
 }
 
-// First returns the first value if present, or the default value if not.
+// First returns the first element in the slice, or the default value if the slice is nil or empty and a default is set.
 func (o *OneOrMany[T]) First() T {
-	if len(o.values) == 0 {
-		return o.defaultValue
+	if o.values == nil || len(o.values) == 0 {
+		if o.hasDefault {
+			return o.defaultValue
+		}
+		var zero T
+		return zero
 	}
 	return o.values[0]
 }
