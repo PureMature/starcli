@@ -213,3 +213,4 @@ $RECYCLE.BIN/
 /starcli*
 /*.yaml
 /*.star
+coverage.txt

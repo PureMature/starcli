@@ -7,6 +7,7 @@ import (
 	"bitbucket.org/neiku/winornot"
 	"github.com/PureMature/starcli/cli"
 	"github.com/PureMature/starcli/config"
+	"github.com/PureMature/starcli/module/email"
 	"github.com/PureMature/starcli/module/sys"
 	"github.com/PureMature/starcli/web"
 	"github.com/spf13/viper"
@@ -51,4 +52,5 @@ func initLogger(level string) {
 	cli.SetLog(log)
 	web.SetLog(log)
 	sys.SetLog(log)
+	email.SetLog(log)
 }

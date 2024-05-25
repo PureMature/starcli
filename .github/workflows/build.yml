@@ -59,6 +59,9 @@ jobs:
           make --version
           make build
       - name: Test
+        run: |
+          make test
+      - name: Preview
         env:
           OSEXT: ${{ fromJSON(env.OSEXT_MAP)[runner.os] }}
         run: |

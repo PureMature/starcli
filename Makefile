@@ -53,6 +53,10 @@ run: build
 preview:
 	STAR_HOST_NAME=Aloha ./$(BINARY) --version --log debug
 
+test:
+	CGO_ENABLED=1 $(GOTEST) -v -race -cover -covermode=atomic -coverprofile=coverage.txt -count 1 ./...
+	$(GOTEST) -parallel=4 -run="none" -benchtime="2s" -benchmem -bench=.
+
 install:
 ifndef GOBIN
 	$(error GOBIN is not set)
