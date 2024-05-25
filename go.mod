@@ -9,6 +9,7 @@ require (
 	github.com/1set/gut v0.0.0-20201117175203-a82363231997
 	github.com/1set/starbox v0.1.1
 	github.com/1set/starlet v0.1.1
+	github.com/resend/resend-go/v2 v2.6.0
 	github.com/samber/lo v1.39.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.16.0
