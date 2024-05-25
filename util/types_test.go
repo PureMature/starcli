@@ -72,6 +72,12 @@ func TestOneOrMany_Unpack(t *testing.T) {
 			want:     []starlark.Int{},
 			wantNull: false,
 		},
+		{
+			name:   "iterable with default",
+			target: NewOneOrMany(starlark.MakeInt(5)),
+			inV:    starlark.NewList([]starlark.Value{starlark.MakeInt(10), starlark.MakeInt(20)}),
+			want:   []starlark.Int{starlark.MakeInt(10), starlark.MakeInt(20)},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -111,7 +117,7 @@ func TestOneOrMany_First(t *testing.T) {
 			name:     "empty with default",
 			target:   NewOneOrMany(starlark.MakeInt(5)),
 			want:     starlark.MakeInt(5),
-			wantNull: true,
+			wantNull: false,
 		},
 		{
 			name:     "single value",
@@ -193,7 +199,7 @@ func TestOneOrMany_IsNull(t *testing.T) {
 		{
 			name:   "empty with default",
 			target: NewOneOrMany(starlark.MakeInt(5)),
-			want:   true,
+			want:   false,
 		},
 		{
 			name:   "single value",

@@ -55,9 +55,9 @@ func (o *OneOrMany[T]) Unpack(v starlark.Value) error {
 	return nil
 }
 
-// IsNull checks if the underlying slice is nil.
+// IsNull checks if the struct is nil or has no underlying values or default value.
 func (o *OneOrMany[T]) IsNull() bool {
-	return o == nil || o.values == nil
+	return o == nil || (o.values == nil && !o.hasDefault)
 }
 
 // Len returns the length of the underlying slice.
