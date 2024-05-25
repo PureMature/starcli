@@ -6,57 +6,70 @@ import (
 	"go.starlark.net/starlark"
 )
 
-// OneOrMany is a type alias for a slice of a specific type.
-type OneOrMany[T starlark.Value] []T
+// OneOrMany encapsulates a slice of a specific type with optional default values.
+type OneOrMany[T starlark.Value] struct {
+	values       []T
+	defaultValue T
+}
+
+// NewOneOrMany creates and returns a new OneOrMany with the given default value.
+func NewOneOrMany[T starlark.Value](defaultValue T) *OneOrMany[T] {
+	return &OneOrMany[T]{values: nil, defaultValue: defaultValue}
+}
 
 // Unpack implements the starlark.Value interface.
-func (s *OneOrMany[T]) Unpack(v starlark.Value) error {
+func (o *OneOrMany[T]) Unpack(v starlark.Value) error {
+	if o == nil {
+		return fmt.Errorf("nil OneOrMany pointer")
+	}
 	if _, ok := v.(starlark.NoneType); ok {
-		*s = nil
+		o.values = nil
 	} else if t, ok := v.(T); ok {
-		*s = []T{t}
+		o.values = []T{t}
 	} else if l, ok := v.(starlark.Iterable); ok {
-		sl := make([]T, 0, 1)
+		sl := make([]T, 0)
 		iter := l.Iterate()
 		defer iter.Done()
-		// iterate over the iterable
 		var x starlark.Value
 		for iter.Next(&x) {
 			if t, ok := x.(T); ok {
 				sl = append(sl, t)
 			} else {
-				return fmt.Errorf("expected %T, got %s", s, x.Type())
+				return fmt.Errorf("expected %T, got %s", o, x.Type())
 			}
 		}
-		*s = sl
+		o.values = sl
 	} else {
-		return fmt.Errorf("expected %T or Iterable or None, got %s", s, v.Type())
+		return fmt.Errorf("expected %T or Iterable or None, got %s", o, v.Type())
 	}
 	return nil
 }
 
-func (s *OneOrMany[T]) IsNull() bool {
-	return s == nil
+// IsNull checks if the OneOrMany is considered null (having no values).
+func (o *OneOrMany[T]) IsNull() bool {
+	return o == nil || len(o.values) == 0
 }
 
-func (s *OneOrMany[T]) Len() int {
-	if s == nil {
+// Len returns the number of elements in OneOrMany.
+func (o *OneOrMany[T]) Len() int {
+	if o.IsNull() {
 		return 0
 	}
-	return len(*s)
+	return len(o.values)
 }
 
-func (s *OneOrMany[T]) Slice() []T {
-	if s == nil {
+// Slice returns the underlying slice of values.
+func (o *OneOrMany[T]) Slice() []T {
+	if o.IsNull() {
 		return []T{}
 	}
-	return *s
+	return o.values
 }
 
-func (s *OneOrMany[T]) First() T {
-	if s == nil || len(*s) == 0 {
-		var zero T
-		return zero
+// First returns the first value if present, or the default value if not.
+func (o *OneOrMany[T]) First() T {
+	if len(o.values) == 0 {
+		return o.defaultValue
 	}
-	return (*s)[0]
+	return o.values[0]
 }
