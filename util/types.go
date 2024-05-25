@@ -35,12 +35,12 @@ func (o *OneOrMany[T]) Unpack(v starlark.Value) error {
 			if t, ok := x.(T); ok {
 				sl = append(sl, t)
 			} else {
-				return fmt.Errorf("expected %T, got %s", o, x.Type())
+				return fmt.Errorf("expected %T, got %s", o.defaultValue, x.Type())
 			}
 		}
 		o.values = sl
 	} else {
-		return fmt.Errorf("expected %T or Iterable or None, got %s", o, v.Type())
+		return fmt.Errorf("expected %T or Iterable or None, got %s", o.defaultValue, v.Type())
 	}
 	return nil
 }

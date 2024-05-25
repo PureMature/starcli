@@ -24,6 +24,12 @@ func TestOneOrMany_Unpack(t *testing.T) {
 			inV:     starlark.String("Hello"),
 			wantErr: true,
 		},
+		{
+			name:    "int",
+			target:  util.NewOneOrMany[starlark.String](starlark.String("")),
+			inV:     starlark.MakeInt(42),
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
