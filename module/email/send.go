@@ -115,7 +115,7 @@ func (m *Module) genSendFunc() starlark.Callable {
 		} else {
 			return starlark.None, fmt.Errorf("no valid from or from_id found")
 		}
-		// TODO: reply to, attachments
+		// TODO: reply to, attachments --- https://resend.com/docs/api-reference/emails/send-email
 
 		convGoString := func(v []starlark.String) []string {
 			l := make([]string, len(v))
