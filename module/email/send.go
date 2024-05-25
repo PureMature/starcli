@@ -7,6 +7,8 @@ import (
 	"github.com/1set/gut/ystring"
 	"github.com/1set/starlet"
 	"github.com/1set/starlet/dataconv"
+	"github.com/1set/starlet/dataconv/types"
+	"github.com/PureMature/starcli/util"
 	"go.starlark.net/starlark"
 )
 
@@ -40,7 +42,7 @@ func (m *Module) LoadModule() starlet.ModuleLoader {
 }
 
 func (m *Module) genSendFunc() starlark.Callable {
-	return starlark.NewBuiltin(ModuleName+".send", func(thread *starlark.Thread, fn *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
+	return starlark.NewBuiltin(ModuleName+".send", func(thread *starlark.Thread, b *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
 		// load config: resend_api_key is required, sender_domain is optional
 		var (
 			resendAPIKey string
@@ -59,6 +61,33 @@ func (m *Module) genSendFunc() starlark.Callable {
 		// do the actual work here
 		fmt.Println("API Key:", resendAPIKey)
 		fmt.Println("Sender Domain:", senderDomain)
+
+		// parse args
+		newOneOrList := func() starlark.Unpacker { return util.NewOneOrManyNoDefault[starlark.String]() }
+		var (
+			subject            types.StringOrBytes // must be set
+			bodyHTML           types.StringOrBytes // one of the three must be set
+			bodyText           types.StringOrBytes
+			bodyMarkdown       types.StringOrBytes
+			toAddresses        = newOneOrList() // one of the three must be set
+			ccAddresses        = newOneOrList()
+			bccAddresses       = newOneOrList()
+			fromAddress        types.StringOrBytes // one of the two must be set
+			fromName           types.StringOrBytes
+			replyAddress       types.StringOrBytes
+			replyName          types.StringOrBytes
+			attachmentFiles    = newOneOrList()
+			attachmentContents = util.NewOneOrManyNoDefault[*starlark.Dict]()
+		)
+		if err := starlark.UnpackArgs(b.Name(), args, kwargs,
+			"subject", &subject,
+			"body_html?", &bodyHTML, "body_text?", &bodyText, "body_markdown?", &bodyMarkdown,
+			"to?", &toAddresses, "cc?", &ccAddresses, "bcc?", &bccAddresses,
+			"from?", &fromAddress, "from_name?", &fromName,
+			"reply_to?", &replyAddress, "reply_name?", &replyName,
+			"attachment_files?", &attachmentFiles, "attachment?", &attachmentContents); err != nil {
+			return starlark.None, err
+		}
 
 		return starlark.None, nil
 	})
