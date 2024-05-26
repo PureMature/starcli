@@ -60,9 +60,12 @@ func (o *OneOrMany[T]) IsNull() bool {
 	return o == nil || (o.values == nil && !o.hasDefault)
 }
 
-// Len returns the length of the underlying slice.
+// Len returns the length of the underlying slice or default value.
 func (o *OneOrMany[T]) Len() int {
 	if o.values == nil {
+		if o.hasDefault {
+			return 1
+		}
 		return 0
 	}
 	return len(o.values)
