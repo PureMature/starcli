@@ -108,6 +108,12 @@ func TestOneOrMany_First(t *testing.T) {
 		wantNull bool
 	}{
 		{
+			name:     "nil receiver",
+			target:   nil,
+			want:     starlark.Int{},
+			wantNull: true,
+		},
+		{
 			name:     "empty no default",
 			target:   NewOneOrManyNoDefault[starlark.Int](),
 			want:     starlark.Int{},
@@ -117,7 +123,7 @@ func TestOneOrMany_First(t *testing.T) {
 			name:     "empty with default",
 			target:   NewOneOrMany(starlark.MakeInt(5)),
 			want:     starlark.MakeInt(5),
-			wantNull: false,
+			wantNull: true,
 		},
 		{
 			name:     "single value",
@@ -150,6 +156,11 @@ func TestOneOrMany_Slice(t *testing.T) {
 		target *OneOrMany[starlark.Int]
 		want   []starlark.Int
 	}{
+		{
+			name:   "nil receiver",
+			target: nil,
+			want:   []starlark.Int{},
+		},
 		{
 			name:   "empty no default",
 			target: NewOneOrManyNoDefault[starlark.Int](),
@@ -203,7 +214,7 @@ func TestOneOrMany_IsNull(t *testing.T) {
 		{
 			name:   "used with default",
 			target: withDefault,
-			want:   false,
+			want:   true,
 		},
 		{
 			name:   "empty no default",
@@ -213,7 +224,7 @@ func TestOneOrMany_IsNull(t *testing.T) {
 		{
 			name:   "empty with default",
 			target: NewOneOrMany(starlark.MakeInt(5)),
-			want:   false,
+			want:   true,
 		},
 		{
 			name:   "single value",
