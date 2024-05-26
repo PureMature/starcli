@@ -235,6 +235,71 @@ func TestOneOrMany_IsNull(t *testing.T) {
 	}
 }
 
+func TestOneOrMany_Len(t *testing.T) {
+	noDefault := NewOneOrManyNoDefault[starlark.Int]()
+	noDefault.Unpack(none)
+	withDefault := NewOneOrMany(starlark.MakeInt(5))
+	withDefault.Unpack(none)
+	tests := []struct {
+		name   string
+		target *OneOrMany[starlark.Int]
+		want   int
+	}{
+		{
+			name:   "nil receiver",
+			target: nil,
+			want:   0,
+		},
+		{
+			name:   "used no default",
+			target: noDefault,
+			want:   0,
+		},
+		{
+			name:   "used with default",
+			target: withDefault,
+			want:   1,
+		},
+		{
+			name:   "empty no default",
+			target: NewOneOrManyNoDefault[starlark.Int](),
+			want:   0,
+		},
+		{
+			name:   "empty with default",
+			target: NewOneOrMany(starlark.MakeInt(5)),
+			want:   1,
+		},
+		{
+			name:   "single value",
+			target: &OneOrMany[starlark.Int]{values: []starlark.Int{starlark.MakeInt(10)}},
+			want:   1,
+		},
+		{
+			name:   "multiple values",
+			target: &OneOrMany[starlark.Int]{values: []starlark.Int{starlark.MakeInt(10), starlark.MakeInt(20)}},
+			want:   2,
+		},
+		{
+			name:   "multiple values with default",
+			target: &OneOrMany[starlark.Int]{values: []starlark.Int{starlark.MakeInt(10), starlark.MakeInt(20)}, hasDefault: true, defaultValue: starlark.MakeInt(5)},
+			want:   2,
+		},
+		{
+			name:   "empty without default, no values",
+			target: &OneOrMany[starlark.Int]{},
+			want:   0,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.target.Len(); got != tt.want {
+				t.Errorf("OneOrMany[%s].Len() = %v, want %v", tt.name, got, tt.want)
+			}
+		})
+	}
+}
+
 func TestOneOrMany_UnpackArgs(t *testing.T) {
 	tests := []struct {
 		name     string
