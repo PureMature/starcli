@@ -137,6 +137,12 @@ func TestOneOrMany_First(t *testing.T) {
 			want:     starlark.MakeInt(10),
 			wantNull: false,
 		},
+		{
+			name:     "iterable with empty list",
+			target:   &OneOrMany[starlark.Int]{values: []starlark.Int{}},
+			want:     starlark.Int{},
+			wantNull: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -180,6 +186,11 @@ func TestOneOrMany_Slice(t *testing.T) {
 			name:   "multiple values",
 			target: &OneOrMany[starlark.Int]{values: []starlark.Int{starlark.MakeInt(10), starlark.MakeInt(20)}, hasDefault: true, defaultValue: starlark.MakeInt(5)},
 			want:   []starlark.Int{starlark.MakeInt(10), starlark.MakeInt(20)},
+		},
+		{
+			name:   "iterable with empty list",
+			target: &OneOrMany[starlark.Int]{values: []starlark.Int{}},
+			want:   []starlark.Int{},
 		},
 	}
 	for _, tt := range tests {
@@ -234,6 +245,11 @@ func TestOneOrMany_IsNull(t *testing.T) {
 		{
 			name:   "multiple values",
 			target: &OneOrMany[starlark.Int]{values: []starlark.Int{starlark.MakeInt(10), starlark.MakeInt(20)}, hasDefault: true, defaultValue: starlark.MakeInt(5)},
+			want:   false,
+		},
+		{
+			name:   "iterable with empty list",
+			target: &OneOrMany[starlark.Int]{values: []starlark.Int{}},
 			want:   false,
 		},
 	}
@@ -299,6 +315,11 @@ func TestOneOrMany_Len(t *testing.T) {
 		{
 			name:   "empty without default, no values",
 			target: &OneOrMany[starlark.Int]{},
+			want:   0,
+		},
+		{
+			name:   "iterable with empty list",
+			target: &OneOrMany[starlark.Int]{values: []starlark.Int{}},
 			want:   0,
 		},
 	}
