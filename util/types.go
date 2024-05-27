@@ -55,14 +55,20 @@ func (o *OneOrMany[T]) Unpack(v starlark.Value) error {
 	return nil
 }
 
-// IsNull checks if the struct is nil or has no underlying values or default value.
+// IsNull checks if the struct is nil or has no underlying slice.
 func (o *OneOrMany[T]) IsNull() bool {
-	return o == nil || (o.values == nil && !o.hasDefault)
+	return o == nil || o.values == nil
 }
 
-// Len returns the length of the underlying slice.
+// Len returns the length of the underlying slice or default value.
 func (o *OneOrMany[T]) Len() int {
+	if o == nil {
+		return 0
+	}
 	if o.values == nil {
+		if o.hasDefault {
+			return 1
+		}
 		return 0
 	}
 	return len(o.values)
@@ -70,6 +76,9 @@ func (o *OneOrMany[T]) Len() int {
 
 // Slice returns the underlying slice, or a slice containing the default value if the slice is nil and a default is set.
 func (o *OneOrMany[T]) Slice() []T {
+	if o == nil {
+		return []T{}
+	}
 	if o.values == nil {
 		if o.hasDefault {
 			return []T{o.defaultValue}
@@ -81,8 +90,8 @@ func (o *OneOrMany[T]) Slice() []T {
 
 // First returns the first element in the slice, or the default value if the slice is nil or empty and a default is set.
 func (o *OneOrMany[T]) First() T {
-	if o.values == nil || len(o.values) == 0 {
-		if o.hasDefault {
+	if o == nil || o.values == nil || len(o.values) == 0 {
+		if o != nil && o.hasDefault {
 			return o.defaultValue
 		}
 		var zero T
