@@ -32,6 +32,21 @@ type Module struct {
 	senderDomain ConfigGetter
 }
 
+// NewModule creates a new bare Module.
+func NewModule() starlet.ModuleLoader {
+	m := &Module{}
+	return m.LoadModule()
+}
+
+// NewModuleWithConfig creates a new Module with the given config.
+func NewModuleWithConfig(resendAPIKey, senderDomain string) starlet.ModuleLoader {
+	m := &Module{
+		resendAPIKey: func() string { return resendAPIKey },
+		senderDomain: func() string { return senderDomain },
+	}
+	return m.LoadModule()
+}
+
 // NewModuleWithGetter creates a new Module with the given config loaders.
 func NewModuleWithGetter(resendAPIKey, senderDomain ConfigGetter) starlet.ModuleLoader {
 	m := &Module{
@@ -44,9 +59,27 @@ func NewModuleWithGetter(resendAPIKey, senderDomain ConfigGetter) starlet.Module
 // LoadModule returns the Starlark module with the given config loaders.
 func (m *Module) LoadModule() starlet.ModuleLoader {
 	sd := starlark.StringDict{
-		"send": m.genSendFunc(),
+		"set_resend_api_key": m.genSetConfig("resend_api_key"),
+		"set_sender_domain":  m.genSetConfig("sender_domain"),
+		"send":               m.genSendFunc(),
 	}
 	return dataconv.WrapModuleData(ModuleName, sd)
+}
+
+func (m *Module) genSetConfig(name string) starlark.Callable {
+	return starlark.NewBuiltin(ModuleName+".set_"+name, func(thread *starlark.Thread, b *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
+		var v starlark.String
+		if err := starlark.UnpackArgs(b.Name(), args, kwargs, name, &v); err != nil {
+			return starlark.None, err
+		}
+		switch name {
+		case "resend_api_key":
+			m.resendAPIKey = func() string { return v.GoString() }
+		case "sender_domain":
+			m.senderDomain = func() string { return v.GoString() }
+		}
+		return starlark.None, nil
+	})
 }
 
 func (m *Module) genSendFunc() starlark.Callable {
