@@ -4,6 +4,8 @@ package email
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
+	"path/filepath"
 
 	"github.com/1set/gut/ystring"
 	"github.com/1set/starlet"
@@ -119,7 +121,6 @@ func (m *Module) genSendFunc() starlark.Callable {
 		} else {
 			return starlark.None, fmt.Errorf("no valid from or from_id found")
 		}
-		// TODO: reply to, attachments --- https://resend.com/docs/api-reference/emails/send-email
 
 		// prepare request
 		convGoString := func(v []starlark.String) []string {
@@ -135,17 +136,17 @@ func (m *Module) genSendFunc() starlark.Callable {
 			Cc:      convGoString(ccAddresses.Slice()),
 			Bcc:     convGoString(bccAddresses.Slice()),
 			Subject: subject.GoString(),
-			// Html:    bodyHTML.GoString(),
-			// Text: bodyText.GoString(), // TODO: markdown
-			// // TODO: reply to, attachments
 		}
 
 		// for body content
 		if !bodyHTML.IsNullOrEmpty() {
+			// directly use HTML content
 			req.Html = bodyHTML.GoString()
 		} else if !bodyText.IsNullOrEmpty() {
+			// directly use text content
 			req.Text = bodyText.GoString()
 		} else if !bodyMarkdown.IsNullOrEmpty() {
+			// convert markdown to HTML
 			markdown := goldmark.New(
 				goldmark.WithRendererOptions(
 					renderer.WithUnsafe(),
@@ -161,9 +162,39 @@ func (m *Module) genSendFunc() starlark.Callable {
 			req.Html = html.String()
 		}
 
-		// debug now
-		fmt.Println("Request:", req)
-		return starlark.None, nil
+		// for attachments
+		if fps := attachmentFiles.Slice(); len(fps) > 0 {
+			// load file content and attach
+			for _, r := range fps {
+				fp := r.GoString()
+				c, err := ioutil.ReadFile(fp)
+				if err != nil {
+					return starlark.None, err
+				}
+				n := filepath.Base(fp)
+				req.Attachments = append(req.Attachments, &resend.Attachment{
+					Filename: n,
+					Content:  c,
+				})
+			}
+		}
+		if dcts := attachmentContents.Slice(); len(dcts) > 0 {
+			// convert dict to attachment and attach
+			for _, r := range dcts {
+				fn, ok, err := r.Get(starlark.String("name"))
+				if !ok || err != nil {
+					return starlark.None, fmt.Errorf("attachment must have a name")
+				}
+				ct, ok, err := r.Get(starlark.String("content"))
+				if !ok || err != nil {
+					return starlark.None, fmt.Errorf("attachment must have content")
+				}
+				req.Attachments = append(req.Attachments, &resend.Attachment{
+					Filename: dataconv.StarString(fn),
+					Content:  []byte(dataconv.StarString(ct)),
+				})
+			}
+		}
 
 		// send it
 		client := resend.NewClient(resendAPIKey)
