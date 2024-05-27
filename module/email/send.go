@@ -66,10 +66,6 @@ func (m *Module) genSendFunc() starlark.Callable {
 			senderDomain = m.senderDomain()
 		}
 
-		// do the actual work here
-		fmt.Println("API Key:", resendAPIKey)
-		fmt.Println("Sender Domain:", senderDomain)
-
 		// parse args
 		newOneOrListStr := func() *util.OneOrMany[starlark.String] { return util.NewOneOrManyNoDefault[starlark.String]() }
 		var (
