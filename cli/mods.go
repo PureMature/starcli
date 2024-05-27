@@ -73,7 +73,7 @@ func loadCLIModuleByName(opts *BoxOpts, name string) (starlet.ModuleLoader, erro
 	case sys.ModuleName:
 		return sys.NewModule(opts.cmdArgs), nil
 	case email.ModuleName:
-		return email.NewModule(config.GetResendAPIKey, config.GetSenderDomain), nil
+		return email.NewModuleWithGetter(config.GetResendAPIKey, config.GetSenderDomain), nil
 	default:
 		return nil, fmt.Errorf("unknown module: %s", name)
 	}

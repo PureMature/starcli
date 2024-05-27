@@ -32,8 +32,8 @@ type Module struct {
 	senderDomain ConfigGetter
 }
 
-// NewModule creates a new Module with the given config loaders.
-func NewModule(resendAPIKey, senderDomain ConfigGetter) starlet.ModuleLoader {
+// NewModuleWithGetter creates a new Module with the given config loaders.
+func NewModuleWithGetter(resendAPIKey, senderDomain ConfigGetter) starlet.ModuleLoader {
 	m := &Module{
 		resendAPIKey: resendAPIKey,
 		senderDomain: senderDomain,
