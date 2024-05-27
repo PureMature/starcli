@@ -2,6 +2,7 @@
 package email
 
 import (
+	"bytes"
 	"fmt"
 
 	"github.com/1set/gut/ystring"
@@ -11,6 +12,9 @@ import (
 	"github.com/PureMature/starcli/util"
 	"github.com/resend/resend-go/v2"
 	"github.com/samber/lo"
+	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/extension"
+	renderer "github.com/yuin/goldmark/renderer/html"
 	"go.starlark.net/starlark"
 )
 
@@ -67,11 +71,11 @@ func (m *Module) genSendFunc() starlark.Callable {
 		// parse args
 		newOneOrListStr := func() *util.OneOrMany[starlark.String] { return util.NewOneOrManyNoDefault[starlark.String]() }
 		var (
-			subject            types.StringOrBytes // must be set
-			bodyHTML           types.StringOrBytes // one of the three must be set
-			bodyText           types.StringOrBytes
-			bodyMarkdown       types.StringOrBytes
-			toAddresses        = newOneOrListStr() // one of the three must be set
+			subject            types.StringOrBytes         // must be set
+			bodyHTML           types.NullableStringOrBytes // one of the three must be set
+			bodyText           types.NullableStringOrBytes
+			bodyMarkdown       types.NullableStringOrBytes
+			toAddresses        = newOneOrListStr() // must be set
 			ccAddresses        = newOneOrListStr()
 			bccAddresses       = newOneOrListStr()
 			fromAddress        types.StringOrBytes // one of the two must be set
@@ -84,7 +88,7 @@ func (m *Module) genSendFunc() starlark.Callable {
 		if err := starlark.UnpackArgs(b.Name(), args, kwargs,
 			"subject", &subject,
 			"body_html?", &bodyHTML, "body_text?", &bodyText, "body_markdown?", &bodyMarkdown,
-			"to?", toAddresses, "cc?", ccAddresses, "bcc?", bccAddresses,
+			"to", toAddresses, "cc?", ccAddresses, "bcc?", bccAddresses,
 			"from?", &fromAddress, "from_id?", &fromNameID,
 			"reply_to?", &replyAddress, "reply_id?", &replyNameID,
 			"attachment_files?", attachmentFiles, "attachment?", attachmentContents); err != nil {
@@ -95,14 +99,14 @@ func (m *Module) genSendFunc() starlark.Callable {
 		if body := []string{bodyHTML.GoString(), bodyText.GoString(), bodyMarkdown.GoString()}; lo.EveryBy(body, ystring.IsBlank) {
 			return starlark.None, fmt.Errorf("one of body_html, body_text, or body_markdown must be non-blank")
 		}
-		if recv := []int{toAddresses.Len(), ccAddresses.Len(), bccAddresses.Len()}; lo.Sum(recv) == 0 {
-			return starlark.None, fmt.Errorf("one of to, cc, or bcc must be set")
+		if toAddresses.Len() == 0 {
+			return starlark.None, fmt.Errorf("to must be set and non-empty")
 		}
 		if from := []string{fromAddress.GoString(), fromNameID.GoString()}; lo.EveryBy(from, ystring.IsBlank) {
 			return starlark.None, fmt.Errorf("one of from or from_id must be non-blank")
 		}
 
-		// prepare request
+		// convert from to send address
 		var sendAddr string
 		if fromAddr := fromAddress.GoString(); ystring.IsNotBlank(fromAddr) {
 			sendAddr = fromAddr
@@ -117,6 +121,7 @@ func (m *Module) genSendFunc() starlark.Callable {
 		}
 		// TODO: reply to, attachments --- https://resend.com/docs/api-reference/emails/send-email
 
+		// prepare request
 		convGoString := func(v []starlark.String) []string {
 			l := make([]string, len(v))
 			for i, vv := range v {
@@ -130,10 +135,35 @@ func (m *Module) genSendFunc() starlark.Callable {
 			Cc:      convGoString(ccAddresses.Slice()),
 			Bcc:     convGoString(bccAddresses.Slice()),
 			Subject: subject.GoString(),
-			Html:    bodyHTML.GoString(),
-			Text:    bodyText.GoString(), // TODO: markdown
-			// TODO: reply to, attachments
+			// Html:    bodyHTML.GoString(),
+			// Text: bodyText.GoString(), // TODO: markdown
+			// // TODO: reply to, attachments
 		}
+
+		// for body content
+		if !bodyHTML.IsNullOrEmpty() {
+			req.Html = bodyHTML.GoString()
+		} else if !bodyText.IsNullOrEmpty() {
+			req.Text = bodyText.GoString()
+		} else if !bodyMarkdown.IsNullOrEmpty() {
+			markdown := goldmark.New(
+				goldmark.WithRendererOptions(
+					renderer.WithUnsafe(),
+				),
+				goldmark.WithExtensions(
+					extension.Strikethrough,
+					extension.Table,
+					extension.Linkify,
+				),
+			)
+			html := bytes.NewBufferString("")
+			_ = markdown.Convert([]byte(bodyMarkdown.GoString()), html)
+			req.Html = html.String()
+		}
+
+		// debug now
+		fmt.Println("Request:", req)
+		return starlark.None, nil
 
 		// send it
 		client := resend.NewClient(resendAPIKey)
