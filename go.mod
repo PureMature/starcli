@@ -9,19 +9,19 @@ require (
 	github.com/1set/gut v0.0.0-20201117175203-a82363231997
 	github.com/1set/starbox v0.1.1
 	github.com/1set/starlet v0.1.2-0.20240528100323-c91e367021b8
-	github.com/PureMature/starport/email v0.0.0-20240528111537-667fca10fecf
+	github.com/PureMature/starport/email v0.0.0-20240528124525-8251bb6de5e8
 	github.com/samber/lo v1.39.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.16.0
-	go.starlark.net v0.0.0-20240520160348-046347dcd104
+	go.starlark.net v0.0.0-20240123142251-f86470692795
 	go.uber.org/atomic v1.11.0
-	go.uber.org/zap v1.27.0
+	go.uber.org/zap v1.24.0
 	golang.org/x/term v0.15.0
 )
 
 require (
 	github.com/1set/starlight v0.1.1 // indirect
-	github.com/PureMature/starport/base v0.0.1 // indirect
+	github.com/PureMature/starport/base v0.0.2 // indirect
 	github.com/aymanbagabas/go-osc52 v1.0.3 // indirect
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
@@ -46,7 +46,7 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/yuin/goldmark v1.7.1 // indirect
-	go.uber.org/multierr v1.10.0 // indirect
+	go.uber.org/multierr v1.9.0 // indirect
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
 	golang.org/x/sys v0.15.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
