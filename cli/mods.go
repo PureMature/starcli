@@ -7,8 +7,8 @@ import (
 	"github.com/1set/starbox"
 	"github.com/1set/starlet"
 	"github.com/PureMature/starcli/config"
-	"github.com/PureMature/starcli/module/email"
 	"github.com/PureMature/starcli/module/sys"
+	"github.com/PureMature/starport/email"
 	"github.com/samber/lo"
 )
 
@@ -73,7 +73,7 @@ func loadCLIModuleByName(opts *BoxOpts, name string) (starlet.ModuleLoader, erro
 	case sys.ModuleName:
 		return sys.NewModule(opts.cmdArgs), nil
 	case email.ModuleName:
-		return email.NewModule(config.GetResendAPIKey, config.GetSenderDomain), nil
+		return email.NewModuleWithGetter(config.GetResendAPIKey, config.GetSenderDomain).LoadModule(), nil
 	default:
 		return nil, fmt.Errorf("unknown module: %s", name)
 	}
