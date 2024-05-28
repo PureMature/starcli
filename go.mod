@@ -9,7 +9,7 @@ require (
 	github.com/1set/gut v0.0.0-20201117175203-a82363231997
 	github.com/1set/starbox v0.1.1
 	github.com/1set/starlet v0.1.2-0.20240528100323-c91e367021b8
-	github.com/PureMature/starport/email v0.0.0-20240528124525-8251bb6de5e8
+	github.com/PureMature/starport/email v0.0.0-20240528142744-0779f0de1d95
 	github.com/samber/lo v1.39.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.16.0
