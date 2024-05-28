@@ -7,9 +7,9 @@ import (
 	"bitbucket.org/neiku/winornot"
 	"github.com/PureMature/starcli/cli"
 	"github.com/PureMature/starcli/config"
-	"github.com/PureMature/starcli/module/email"
 	"github.com/PureMature/starcli/module/sys"
 	"github.com/PureMature/starcli/web"
+	"github.com/PureMature/starport/email"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
