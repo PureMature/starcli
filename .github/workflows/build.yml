@@ -10,7 +10,7 @@ on:
       - 'LICENSE'
 
 env:
-  OSEXT_MAP: '{"ubuntu-20.04": "linux", "macos-13": "mac_intel", "macos-14": "mac_apple", "Windows": "exe"}'
+  OSEXT_MAP: '{"ubuntu-20.04": "linux", "macos-13": "mac_intel", "macos-14": "mac_apple", "windows-2022": "exe"}'
   CACHE_PREFIX: upload-${{ github.run_id }}-${{ github.run_attempt }}
 
 defaults:
