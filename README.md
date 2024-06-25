@@ -6,14 +6,14 @@ StarCLI is a command-line interface for executing Starlark scripts with various 
 
 ### Windows
 
-Download the executable from the [releases page](https://github.com/PureMature/starcli/releases/download/b2/starcli.exe).
+Download the executable from the [releases page](https://github.com/PureMature/starcli/releases/download/b4/starcli.exe).
 
 ### macOS
 
 Run the following commands in your terminal:
 
 ```sh
-curl -sSL https://github.com/PureMature/starcli/releases/download/b2/starcli.macos -o starcli
+curl -sSL https://github.com/PureMature/starcli/releases/download/b4/starcli.mac_apple -o starcli
 install -m 0755 starcli /usr/local/bin
 ```
 
@@ -22,7 +22,7 @@ install -m 0755 starcli /usr/local/bin
 Run the following commands in your terminal:
 
 ```sh
-curl -sSL https://github.com/PureMature/starcli/releases/download/b2/starcli.linux -o starcli
+curl -sSL https://github.com/PureMature/starcli/releases/download/b4/starcli.linux -o starcli
 install -m 0755 starcli /usr/local/bin
 ```
 
