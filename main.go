@@ -10,6 +10,7 @@ import (
 	"github.com/PureMature/starcli/module/sys"
 	"github.com/PureMature/starcli/web"
 	"github.com/PureMature/starport/email"
+	"github.com/PureMature/starport/llm"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
@@ -53,5 +54,5 @@ func initLogger(level string) {
 	web.SetLog(log)
 	sys.SetLog(log)
 	email.SetLog(log)
-	// llm.SetLog(log)
+	llm.SetLog(log)
 }

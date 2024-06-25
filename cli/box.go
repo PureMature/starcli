@@ -98,7 +98,7 @@ func getPrinterFunc(sc scenarioCode, printer string) (starlet.PrintFunc, error) 
 		case scenarioDirect:
 			pn = "stdout"
 		case scenarioFile:
-			pn = "since"
+			pn = "lineno"
 		case scenarioWeb:
 			pn = "basic"
 		}

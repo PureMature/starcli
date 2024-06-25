@@ -10,7 +10,7 @@ require (
 	github.com/1set/starbox v0.1.2-0.20240625062955-8abe339f6959
 	github.com/1set/starlet v0.1.2-0.20240625041505-6d190fac7b11
 	github.com/PureMature/starport/email v0.0.1
-	github.com/PureMature/starport/llm v0.0.1
+	github.com/PureMature/starport/llm v0.0.2
 	github.com/kyokomi/emoji/v2 v2.2.13
 	github.com/samber/lo v1.39.0
 	github.com/spf13/pflag v1.0.5
