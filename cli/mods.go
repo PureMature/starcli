@@ -44,36 +44,6 @@ func loadModules(box *starbox.Starbox, opts *BoxOpts) error {
 	})
 	box.AddModulesByName(usrMods...)
 
-	/*
-		// inspect user modules
-		allMods := getDefaultModules()
-		unloadStar, unknown := lo.Difference(allMods, usrMods)
-		log.Debugw("inspect user mods", "all_modules", allMods, "user_modules", usrMods, "unload_star_modules", unloadStar, "unknown_modules", unknown)
-		if len(unknown) > 0 {
-			return fmt.Errorf("unknown module(s): %v", unknown)
-		}
-
-		// load star* modules
-		selectStarMods := lo.Intersect(starMods, usrMods)
-		log.Debugw("selected star modules", "star_modules", selectStarMods)
-		if len(selectStarMods) > 0 {
-			box.AddNamedModules(selectStarMods...)
-		}
-
-		// load cli modules
-		selectCLIMods := lo.Intersect(cliMods, usrMods)
-		log.Debugw("selected cli modules", "cli_modules", selectCLIMods)
-		if len(selectCLIMods) > 0 {
-			for _, name := range selectCLIMods {
-				ml, err := loadCLIModuleByName(opts, name)
-				if err != nil {
-					return err
-				}
-				box.AddModuleLoader(name, ml)
-			}
-		}
-	*/
-
 	// all is well
 	return nil
 }
