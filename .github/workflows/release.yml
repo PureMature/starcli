@@ -14,7 +14,7 @@ on:
         required: true
 
 env:
-  OSEXT_MAP: '{"Linux": "linux", "macOS": "macos", "Windows": "exe"}'
+  OSEXT_MAP: '{"ubuntu-20.04": "linux", "macos-13": "mac_intel", "macos-14": "mac_apple", "Windows": "exe"}'
   CACHE_PREFIX: upload-${{ github.run_id }}-${{ github.run_attempt }}
 
 defaults:
@@ -66,7 +66,7 @@ jobs:
           make build
       - name: Test
         env:
-          OSEXT: ${{ fromJSON(env.OSEXT_MAP)[runner.os] }}
+          OSEXT: ${{ fromJSON(env.OSEXT_MAP)[matrix.vm-os] }}
         run: |
           make preview
           make artifact
