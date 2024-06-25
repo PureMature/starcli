@@ -97,7 +97,7 @@ func getPrinterFunc(sc scenarioCode, printer string) (starlet.PrintFunc, error) 
 		case scenarioDirect:
 			pn = "stdout"
 		case scenarioFile:
-			pn = "linenum"
+			pn = "since"
 		case scenarioWeb:
 			pn = "basic"
 		}
@@ -128,7 +128,7 @@ func getPrinterFunc(sc scenarioCode, printer string) (starlet.PrintFunc, error) 
 		cnt := atomic.NewInt64(0)
 		now := time.Now()
 		return func(thread *starlark.Thread, msg string) {
-			prefix := fmt.Sprintf("[%04d](%.03f)%s ", cnt.Inc(), time.Since(now).Seconds(), util.StringEmoji(msg))
+			prefix := fmt.Sprintf("[%04d](%.03f)%s", cnt.Inc(), time.Since(now).Seconds(), util.StringEmoji(msg))
 			fmt.Fprintln(os.Stderr, prefix, msg)
 		}, nil
 	default:
