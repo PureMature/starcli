@@ -1,8 +1,6 @@
 package cli
 
 import (
-	"fmt"
-
 	"github.com/1set/gut/ystring"
 	"github.com/PureMature/starcli/util"
 	flag "github.com/spf13/pflag"
@@ -43,10 +41,6 @@ func ParseArgs() *Args {
 	flag.StringVarP(&args.OutputPrinter, "output", "o", "auto", "output printer: none,stdout,stderr,basic,lineno,since,auto")
 	flag.StringVarP(&args.ConfigFile, "config", "C", "", "config file to load")
 	flag.Parse()
-
-	flag.Visit(func(f *flag.Flag) {
-		fmt.Println("🏳️‍⚧️", f.Name, f.Value)
-	})
 
 	// keep the rest of arguments
 	args.NumberOfArgs = flag.NArg()
