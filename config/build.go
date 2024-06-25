@@ -35,9 +35,9 @@ func DisplayBuildInfo() {
 	// write logo
 	var sb strings.Builder
 	if onMaster {
-		sb.WriteString(cl.RoseWaterByColumn(logoArt))
+		sb.WriteString(cl.AnamnisarByColumn(logoArt))
 	} else {
-		sb.WriteString(cl.EveningNightByColumn(logoArt))
+		sb.WriteString(cl.OceanSandByColumn(logoArt))
 	}
 	sb.WriteString(ystring.NewLine)
 

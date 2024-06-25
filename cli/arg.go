@@ -1,12 +1,14 @@
 package cli
 
 import (
+	"fmt"
+
 	"github.com/1set/gut/ystring"
 	"github.com/PureMature/starcli/util"
 	flag "github.com/spf13/pflag"
 )
 
-// Args is the command line arguments for StarCLI.
+// Args is the command line arguments for starcli.
 type Args struct {
 	AllowRecursion      bool
 	AllowGlobalReassign bool
@@ -30,7 +32,7 @@ func ParseArgs() *Args {
 
 	// parse command line arguments
 	flag.BoolVarP(&args.AllowRecursion, "recursion", "r", false, "allow recursion in Starlark code")
-	flag.BoolVarP(&args.AllowGlobalReassign, "globalreassign", "g", false, "allow reassigning global variables in Starlark code")
+	flag.BoolVarP(&args.AllowGlobalReassign, "globalreassign", "g", true, "allow reassigning global variables in Starlark code")
 	flag.StringSliceVarP(&args.ModulesToLoad, "module", "m", getDefaultModules(), "Modules to load before executing Starlark code")
 	flag.StringVarP(&args.IncludePath, "include", "I", ".", "include path for Starlark code to load modules from")
 	flag.StringVarP(&args.CodeContent, "code", "c", "", "Starlark code to execute")
@@ -38,14 +40,30 @@ func ParseArgs() *Args {
 	flag.StringVarP(&args.LogLevel, "log", "l", "info", "log level: debug, info, warn, error, dpanic, panic, fatal")
 	flag.BoolVarP(&args.ShowVersion, "version", "V", false, "print version & build information")
 	flag.BoolVarP(&args.InteractiveMode, "interactive", "i", false, "enter interactive mode after executing")
-	flag.StringVarP(&args.OutputPrinter, "output", "o", "auto", "output printer: none,stdout,stderr,basic,lineno,auto")
+	flag.StringVarP(&args.OutputPrinter, "output", "o", "auto", "output printer: none,stdout,stderr,basic,lineno,since,auto")
 	flag.StringVarP(&args.ConfigFile, "config", "C", "", "config file to load")
 	flag.Parse()
+
+	flag.Visit(func(f *flag.Flag) {
+		fmt.Println("🏳️‍⚧️", f.Name, f.Value)
+	})
 
 	// keep the rest of arguments
 	args.NumberOfArgs = flag.NArg()
 	args.Arguments = flag.Args()
 	return args
+}
+
+// BasicBoxOpts returns the basic BoxOpts object based on the command line arguments.
+func (a *Args) BasicBoxOpts() *BoxOpts {
+	return &BoxOpts{
+		cmdArgs:        a.Arguments,
+		includePath:    a.IncludePath,
+		moduleToLoad:   a.ModulesToLoad,
+		printerName:    a.OutputPrinter,
+		recursion:      a.AllowRecursion,
+		globalReassign: a.AllowGlobalReassign,
+	}
 }
 
 // Process processes the command line arguments and executes desired actions, it returns the exit code.

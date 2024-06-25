@@ -14,16 +14,16 @@ func InitConfig(configPath string) error {
 		// use the provided config file
 		viper.SetConfigFile(configPath)
 	} else {
+		// search config in current directory
+		viper.AddConfigPath(".")
+
 		// try to find home and config directories
-		home, err := os.UserHomeDir()
-		if err != nil {
-			return err
+		if home, err := os.UserHomeDir(); err == nil {
+			configDir := filepath.Join(home, ".config", AppName)
+			viper.AddConfigPath(configDir)
 		}
-		configDir := filepath.Join(home, ".config", AppName)
 
 		// search config in current and config directory with name app name (without extension)
-		viper.AddConfigPath(".")
-		viper.AddConfigPath(configDir)
 		viper.SetConfigType("yaml")
 		viper.SetConfigName("config")
 	}

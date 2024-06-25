@@ -37,21 +37,16 @@ func runWebServer(args *Args) error {
 	}
 
 	// attempt to build box
-	opt := BoxOpts{
-		scenario:     scenarioWeb,
-		name:         "web",
-		includePath:  args.IncludePath,
-		moduleToLoad: args.ModulesToLoad,
-		cmdArgs:      args.Arguments,
-		printerName:  args.OutputPrinter,
-	}
-	if _, err := BuildBox(&opt); err != nil {
+	opt := args.BasicBoxOpts()
+	opt.scenario = scenarioWeb
+	opt.name = "web"
+	if _, err := BuildBox(opt); err != nil {
 		return err
 	}
 
 	// start web server
 	build := func() *starbox.RunnerConfig {
-		b, _ := BuildBox(&opt)
+		b, _ := BuildBox(opt)
 		return runner.Starbox(b)
 	}
 	return web.Start(webPort, build)
@@ -59,14 +54,11 @@ func runWebServer(args *Args) error {
 
 func runDirectCode(args *Args) error {
 	// build box and runner
-	box, err := BuildBox(&BoxOpts{
-		scenario:     scenarioDirect,
-		name:         "direct",
-		includePath:  args.IncludePath,
-		moduleToLoad: args.ModulesToLoad,
-		cmdArgs:      append([]string{`-c`}, args.Arguments...),
-		printerName:  args.OutputPrinter,
-	})
+	opt := args.BasicBoxOpts()
+	opt.scenario = scenarioDirect
+	opt.name = "direct"
+	opt.cmdArgs = append([]string{`-c`}, args.Arguments...)
+	box, err := BuildBox(opt)
 	if err != nil {
 		return err
 	}
@@ -88,14 +80,11 @@ func runREPL(args *Args) error {
 	}
 
 	// build box and run
-	box, err := BuildBox(&BoxOpts{
-		scenario:     scenarioREPL,
-		name:         "repl",
-		includePath:  args.IncludePath,
-		moduleToLoad: args.ModulesToLoad,
-		cmdArgs:      []string{``},
-		printerName:  args.OutputPrinter,
-	})
+	opt := args.BasicBoxOpts()
+	opt.scenario = scenarioREPL
+	opt.name = "repl"
+	opt.cmdArgs = []string{``}
+	box, err := BuildBox(opt)
 	if err != nil {
 		return err
 	}
@@ -118,14 +107,10 @@ func runScriptFile(args *Args) error {
 
 	// build box and runner
 	name := filepath.Base(fileName)
-	box, err := BuildBox(&BoxOpts{
-		scenario:     scenarioFile,
-		name:         name,
-		includePath:  args.IncludePath,
-		moduleToLoad: args.ModulesToLoad,
-		cmdArgs:      args.Arguments,
-		printerName:  args.OutputPrinter,
-	})
+	opt := args.BasicBoxOpts()
+	opt.scenario = scenarioFile
+	opt.name = name
+	box, err := BuildBox(opt)
 	if err != nil {
 		return err
 	}
