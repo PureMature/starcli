@@ -42,7 +42,7 @@ func BuildBox(opts *BoxOpts) (*starbox.Starbox, error) {
 	if ystring.IsNotBlank(opts.includePath) {
 		box.SetFS(os.DirFS(opts.includePath))
 	}
-	box.SetLogger(log)
+	box.SetLogger(log) // it's a HACK here, since log is a global variable
 
 	// set inspect condition
 	mac := box.GetMachine()
@@ -121,8 +121,7 @@ func getPrinterFunc(sc scenarioCode, printer string) (starlet.PrintFunc, error) 
 	case "lineno", "linenum":
 		cnt := atomic.NewInt64(0)
 		return func(thread *starlark.Thread, msg string) {
-			//prefix := fmt.Sprintf("%04d [⭐|%s](%s)", cnt.Inc(), name, time.Now().UTC().Format(`15:04:05.000`))
-			prefix := fmt.Sprintf("[%04d](%s)", cnt.Inc(), time.Now().UTC().Format(`15:04:05.000`))
+			prefix := fmt.Sprintf("[%04d](%s)%s", cnt.Inc(), time.Now().UTC().Format(`15:04:05.000`), util.StringEmoji(msg))
 			fmt.Fprintln(os.Stderr, prefix, msg)
 		}, nil
 	case "since":
