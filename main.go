@@ -53,4 +53,5 @@ func initLogger(level string) {
 	web.SetLog(log)
 	sys.SetLog(log)
 	email.SetLog(log)
+	// llm.SetLog(log)
 }

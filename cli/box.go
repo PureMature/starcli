@@ -25,12 +25,14 @@ const (
 
 // BoxOpts defines the options for creating a new Starbox instance.
 type BoxOpts struct {
-	scenario     scenarioCode
-	name         string
-	includePath  string
-	moduleToLoad []string
-	cmdArgs      []string
-	printerName  string
+	scenario       scenarioCode
+	name           string
+	includePath    string
+	moduleToLoad   []string
+	cmdArgs        []string
+	printerName    string
+	recursion      bool
+	globalReassign bool
 }
 
 // BuildBox creates a new Starbox with the given options.
@@ -39,6 +41,20 @@ func BuildBox(opts *BoxOpts) (*starbox.Starbox, error) {
 	box := starbox.New(opts.name)
 	if ystring.IsNotBlank(opts.includePath) {
 		box.SetFS(os.DirFS(opts.includePath))
+	}
+	box.SetLogger(log)
+
+	// set inspect condition
+	mac := box.GetMachine()
+	if opts.globalReassign {
+		mac.EnableGlobalReassign()
+	} else {
+		mac.DisableGlobalReassign()
+	}
+	if opts.recursion {
+		mac.EnableRecursionSupport()
+	} else {
+		mac.DisableRecursionSupport()
 	}
 
 	// set print function: TODO: for scenario, and throw errors
@@ -82,7 +98,7 @@ func getPrinterFunc(sc scenarioCode, printer string) (starlet.PrintFunc, error) 
 		case scenarioDirect:
 			pn = "stdout"
 		case scenarioFile:
-			pn = "linenum"
+			pn = "since"
 		case scenarioWeb:
 			pn = "basic"
 		}
@@ -107,6 +123,13 @@ func getPrinterFunc(sc scenarioCode, printer string) (starlet.PrintFunc, error) 
 		return func(thread *starlark.Thread, msg string) {
 			//prefix := fmt.Sprintf("%04d [⭐|%s](%s)", cnt.Inc(), name, time.Now().UTC().Format(`15:04:05.000`))
 			prefix := fmt.Sprintf("[%04d](%s)", cnt.Inc(), time.Now().UTC().Format(`15:04:05.000`))
+			fmt.Fprintln(os.Stderr, prefix, msg)
+		}, nil
+	case "since":
+		cnt := atomic.NewInt64(0)
+		now := time.Now()
+		return func(thread *starlark.Thread, msg string) {
+			prefix := fmt.Sprintf("[%04d](%.03f)%s", cnt.Inc(), time.Since(now).Seconds(), util.StringEmoji(msg))
 			fmt.Fprintln(os.Stderr, prefix, msg)
 		}, nil
 	default:
