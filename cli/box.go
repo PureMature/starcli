@@ -42,6 +42,7 @@ func BuildBox(opts *BoxOpts) (*starbox.Starbox, error) {
 	if ystring.IsNotBlank(opts.includePath) {
 		box.SetFS(os.DirFS(opts.includePath))
 	}
+	box.SetLogger(log)
 
 	// set inspect condition
 	mac := box.GetMachine()
